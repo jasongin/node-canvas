@@ -10,13 +10,13 @@
 
 #include "Canvas.h"
 
-class Pattern: public Nan::ObjectWrap {
+class Pattern {
   public:
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
+    static napi_persistent constructor;
+    static void Initialize(napi_env env, napi_value target);
+    static NAPI_METHOD(New);
     Pattern(cairo_surface_t *surface);
-    inline cairo_pattern_t *pattern(){ return _pattern; }
+    inline cairo_pattern_t *pattern() { return _pattern; }
 
   private:
     ~Pattern();

@@ -9,91 +9,106 @@
 #include "Canvas.h"
 #include "CanvasGradient.h"
 
-Nan::Persistent<FunctionTemplate> Gradient::constructor;
+napi_persistent Gradient::constructor;
 
 /*
  * Initialize CanvasGradient.
  */
 
 void
-Gradient::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
-  Nan::HandleScope scope;
+Gradient::Initialize(napi_env env, napi_value target) {
+  Napi::HandleScope scope;
 
-  // Constructor
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(Gradient::New);
-  constructor.Reset(ctor);
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("CanvasGradient").ToLocalChecked());
+  napi_property_descriptor properties[] = {
+    { "addColorStop", AddColorStop },
+  };
+  napi_value ctor = napi_create_constructor(env, "CanvasGradient", New, nullptr,
+    sizeof(properties) / sizeof(*properties), properties);
 
-  // Prototype
-  Nan::SetPrototypeMethod(ctor, "addColorStop", AddColorStop);
-  Nan::Set(target, Nan::New("CanvasGradient").ToLocalChecked(), ctor->GetFunction());
+  napi_set_property(env, target, napi_property_name(env, "CanvasGradient"), ctor);
+  constructor = napi_create_persistent(env, ctor);
 }
 
 /*
  * Initialize a new CanvasGradient.
  */
 
-NAN_METHOD(Gradient::New) {
-  if (!info.IsConstructCall()) {
-    return Nan::ThrowTypeError("Class constructors cannot be invoked without 'new'");
+NAPI_METHOD(Gradient::New) {
+  if (!napi_is_construct_call(env, info)) {
+    napi_throw_type_error(env, "Class constructors cannot be invoked without 'new'");
+    return;
   }
 
+  int len = napi_get_cb_args_length(env, info);
+  napi_value args[6];
+  napi_get_cb_args(env, info, args, 6);
+
   // Linear
-  if (4 == info.Length()) {
+  if (4 == len) {
     Gradient *grad = new Gradient(
-        info[0]->NumberValue()
-      , info[1]->NumberValue()
-      , info[2]->NumberValue()
-      , info[3]->NumberValue());
-    grad->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
+      napi_get_number_from_value(env, args[0]),
+      napi_get_number_from_value(env, args[1]),
+      napi_get_number_from_value(env, args[2]),
+      napi_get_number_from_value(env, args[3]));
+    napi_value wrapper = napi_get_cb_this(env, info);
+    napi_wrap(env, wrapper, grad, nullptr, nullptr); // TODO: Destructor?
+    napi_set_return_value(env, info, wrapper);
     return;
   }
 
   // Radial
-  if (6 == info.Length()) {
+  if (6 == len) {
     Gradient *grad = new Gradient(
-        info[0]->NumberValue()
-      , info[1]->NumberValue()
-      , info[2]->NumberValue()
-      , info[3]->NumberValue()
-      , info[4]->NumberValue()
-      , info[5]->NumberValue());
-    grad->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
+        napi_get_number_from_value(env, args[0]),
+        napi_get_number_from_value(env, args[1]),
+        napi_get_number_from_value(env, args[2]),
+        napi_get_number_from_value(env, args[3]),
+        napi_get_number_from_value(env, args[4]),
+        napi_get_number_from_value(env, args[5]));
+    napi_value wrapper = napi_get_cb_this(env, info);
+    napi_wrap(env, wrapper, grad, nullptr, nullptr); // TODO: Destructor?
+    napi_set_return_value(env, info, wrapper);
     return;
   }
 
-  return Nan::ThrowTypeError("invalid arguments");
+  napi_throw_type_error(env, "invalid arguments");
 }
 
 /*
  * Add color stop.
  */
 
-NAN_METHOD(Gradient::AddColorStop) {
-  if (!info[0]->IsNumber())
-    return Nan::ThrowTypeError("offset required");
-  if (!info[1]->IsString())
-    return Nan::ThrowTypeError("color string required");
+NAPI_METHOD(Gradient::AddColorStop) {
+  napi_value args[2];
+  napi_get_cb_args(env, info, args, 2);
 
-  Gradient *grad = Nan::ObjectWrap::Unwrap<Gradient>(info.This());
+  if (napi_number != napi_get_type_of_value(env, args[0])) {
+    napi_throw_type_error(env, "offset required");
+    return;
+  }
+  if (napi_string != napi_get_type_of_value(env, args[1])) {
+    napi_throw_type_error(env, "color string required");
+    return;
+  }
+
+  Gradient* grad = reinterpret_cast<Gradient*>(
+      napi_unwrap(env, napi_get_cb_this(env, info)));
+
   short ok;
-  String::Utf8Value str(info[1]);
+  Napi::Utf8String str(args[1]);
   uint32_t rgba = rgba_from_string(*str, &ok);
 
   if (ok) {
     rgba_t color = rgba_create(rgba);
     cairo_pattern_add_color_stop_rgba(
         grad->pattern()
-      , info[0]->NumberValue()
+      , napi_get_number_from_value(env, args[0])
       , color.r
       , color.g
       , color.b
       , color.a);
   } else {
-    return Nan::ThrowTypeError("parse color failed");
+    napi_throw_type_error(env, "parse color failed");
   }
 }
 

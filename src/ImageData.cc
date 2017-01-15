@@ -7,38 +7,46 @@
 
 #include "ImageData.h"
 
-Nan::Persistent<FunctionTemplate> ImageData::constructor;
+napi_persistent ImageData::constructor;
 
 /*
  * Initialize ImageData.
  */
 
 void
-ImageData::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
-  Nan::HandleScope scope;
+ImageData::Initialize(napi_env env, napi_value target) {
+  Napi::HandleScope scope;
 
-  // Constructor
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(ImageData::New);
-  constructor.Reset(ctor);
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("ImageData").ToLocalChecked());
+  napi_property_descriptor properties[] = {
+    { "width", nullptr, GetWidth },
+    { "height", nullptr, GetHeight },
+  };
+  napi_value ctor = napi_create_constructor(env, "ImageData", New, nullptr,
+    sizeof(properties) / sizeof(*properties), properties);
 
-  // Prototype
-  Local<ObjectTemplate> proto = ctor->PrototypeTemplate();
-  Nan::SetAccessor(proto, Nan::New("width").ToLocalChecked(), GetWidth);
-  Nan::SetAccessor(proto, Nan::New("height").ToLocalChecked(), GetHeight);
-  Nan::Set(target, Nan::New("ImageData").ToLocalChecked(), ctor->GetFunction());
+  napi_set_property(env, target, napi_property_name(env, "ImageData"), ctor);
+  constructor = napi_create_persistent(env, ctor);
 }
 
 /*
  * Initialize a new ImageData object.
  */
 
-NAN_METHOD(ImageData::New) {
-  if (!info.IsConstructCall()) {
-    return Nan::ThrowTypeError("Class constructors cannot be invoked without 'new'");
+NAPI_METHOD(ImageData::New) {
+  if (!napi_is_construct_call(env, info)) {
+    napi_throw_type_error(env, "Class constructors cannot be invoked without 'new'");
+    return;
   }
 
+  napi_value args[3];
+  napi_get_cb_args(env, info, args, 3);
+
+  // TODO: Construct image data
+  napi_value clampedArray = napi_get_null(env);
+  uint32_t width = 0;
+  uint32_t height = 0;
+
+  /*
 #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION <= 10
   Local<v8::Object> clampedArray;
   Local<Object> global = Context::GetCurrent()->Global();
@@ -109,27 +117,34 @@ NAN_METHOD(ImageData::New) {
   }
 
   Nan::TypedArrayContents<uint8_t> dataPtr(clampedArray);
+  */
+  void* dataPtr = nullptr;
 
-  ImageData *imageData = new ImageData(reinterpret_cast<uint8_t*>(*dataPtr), width, height);
-  imageData->Wrap(info.This());
-  info.This()->Set(Nan::New("data").ToLocalChecked(), clampedArray);
-  info.GetReturnValue().Set(info.This());
+  napi_value wrapper = napi_get_cb_this(env, info);
+  ImageData *imageData = new ImageData(reinterpret_cast<uint8_t*>(dataPtr), width, height);
+  napi_set_property(env, wrapper, napi_propertyname("data"), clampedArray);
+  napi_wrap(env, wrapper, imageData, nullptr, nullptr); // TODO: Destructor?
+  napi_set_return_value(env, info, wrapper);
 }
 
 /*
  * Get width.
  */
 
-NAN_GETTER(ImageData::GetWidth) {
-  ImageData *imageData = Nan::ObjectWrap::Unwrap<ImageData>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(imageData->width()));
+NAPI_GETTER(ImageData::GetWidth) {
+  ImageData* imageData = reinterpret_cast<ImageData*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
+  napi_set_return_value(env, info,
+    napi_create_number(env, imageData->width()));
 }
 
 /*
  * Get height.
  */
 
-NAN_GETTER(ImageData::GetHeight) {
-  ImageData *imageData = Nan::ObjectWrap::Unwrap<ImageData>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(imageData->height()));
+NAPI_GETTER(ImageData::GetHeight) {
+  ImageData* imageData = reinterpret_cast<ImageData*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
+  napi_set_return_value(env, info,
+    napi_create_number(env, imageData->height()));
 }

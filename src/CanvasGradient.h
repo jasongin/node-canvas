@@ -10,12 +10,12 @@
 
 #include "Canvas.h"
 
-class Gradient: public Nan::ObjectWrap {
+class Gradient {
   public:
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
-    static NAN_METHOD(AddColorStop);
+    static napi_persistent constructor;
+    static void Initialize(napi_env env, napi_value target);
+    static NAPI_METHOD(New);
+    static NAPI_METHOD(AddColorStop);
     Gradient(double x0, double y0, double x1, double y1);
     Gradient(double x0, double y0, double r0, double x1, double y1, double r1);
     inline cairo_pattern_t *pattern(){ return _pattern; }

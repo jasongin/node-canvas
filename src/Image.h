@@ -27,26 +27,26 @@
 
 
 
-class Image: public Nan::ObjectWrap {
+class Image {
   public:
     char *filename;
     int width, height;
-    Nan::Callback *onload;
-    Nan::Callback *onerror;
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
-    static NAN_GETTER(GetSource);
-    static NAN_GETTER(GetOnload);
-    static NAN_GETTER(GetOnerror);
-    static NAN_GETTER(GetComplete);
-    static NAN_GETTER(GetWidth);
-    static NAN_GETTER(GetHeight);
-    static NAN_GETTER(GetDataMode);
-    static NAN_SETTER(SetSource);
-    static NAN_SETTER(SetOnload);
-    static NAN_SETTER(SetOnerror);
-    static NAN_SETTER(SetDataMode);
+    Napi::Callback *onload;
+    Napi::Callback *onerror;
+    static napi_persistent constructor;
+    static void Initialize(napi_env env, napi_value target);
+    static NAPI_METHOD(New);
+    static NAPI_GETTER(GetSource);
+    static NAPI_GETTER(GetOnload);
+    static NAPI_GETTER(GetOnerror);
+    static NAPI_GETTER(GetComplete);
+    static NAPI_GETTER(GetWidth);
+    static NAPI_GETTER(GetHeight);
+    static NAPI_GETTER(GetDataMode);
+    static NAPI_SETTER(SetSource);
+    static NAPI_SETTER(SetOnload);
+    static NAPI_SETTER(SetOnerror);
+    static NAPI_SETTER(SetDataMode);
     inline cairo_surface_t *surface(){ return _surface; }
     inline uint8_t *data(){ return cairo_image_surface_get_data(_surface); }
     inline int stride(){ return cairo_image_surface_get_stride(_surface); }
@@ -73,7 +73,7 @@ class Image: public Nan::ObjectWrap {
     cairo_status_t assignDataAsMime(uint8_t *data, int len, const char *mime_type);
 #endif
 #endif
-    void error(Local<Value> error);
+    void error(napi_value error);
     void loaded();
     cairo_status_t load();
     Image();

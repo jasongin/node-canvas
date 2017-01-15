@@ -28,59 +28,67 @@ typedef struct {
   uint8_t *buf;
 } read_closure_t;
 
-Nan::Persistent<FunctionTemplate> Image::constructor;
+napi_persistent Image::constructor;
 
 /*
  * Initialize Image.
  */
 
 void
-Image::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
-  Nan::HandleScope scope;
+Image::Initialize(napi_env env, napi_value target) {
+  Napi::HandleScope scope;
 
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(Image::New);
-  constructor.Reset(ctor);
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("Image").ToLocalChecked());
-
-  // Prototype
-  Local<ObjectTemplate> proto = ctor->PrototypeTemplate();
-  Nan::SetAccessor(proto, Nan::New("source").ToLocalChecked(), GetSource, SetSource);
-  Nan::SetAccessor(proto, Nan::New("complete").ToLocalChecked(), GetComplete);
-  Nan::SetAccessor(proto, Nan::New("width").ToLocalChecked(), GetWidth);
-  Nan::SetAccessor(proto, Nan::New("height").ToLocalChecked(), GetHeight);
-  Nan::SetAccessor(proto, Nan::New("onload").ToLocalChecked(), GetOnload, SetOnload);
-  Nan::SetAccessor(proto, Nan::New("onerror").ToLocalChecked(), GetOnerror, SetOnerror);
+  napi_property_descriptor properties[] = {
+    { "source", nullptr, GetSource, SetSource },
+    { "complete", nullptr, GetComplete },
+    { "width", nullptr, GetWidth },
+    { "height", nullptr, GetHeight },
+    { "onload", nullptr, GetOnload, SetOnload },
+    { "onerror", nullptr, GetOnerror, SetOnerror },
 #if CAIRO_VERSION_MINOR >= 10
-  Nan::SetAccessor(proto, Nan::New("dataMode").ToLocalChecked(), GetDataMode, SetDataMode);
-  ctor->Set(Nan::New("MODE_IMAGE").ToLocalChecked(), Nan::New<Number>(DATA_IMAGE));
-  ctor->Set(Nan::New("MODE_MIME").ToLocalChecked(), Nan::New<Number>(DATA_MIME));
+    { "dataMode", nullptr, GetDataMode, SetDataMode },
 #endif
-  Nan::Set(target, Nan::New("Image").ToLocalChecked(), ctor->GetFunction());
+  };
+  napi_value ctor = napi_create_constructor(env, "Image", New, nullptr,
+    sizeof(properties)/sizeof(*properties), properties);
+
+#if CAIRO_VERSION_MINOR >= 10
+  napi_set_property(env, ctor, napi_property_name(env, "MODE_IMAGE"),
+    napi_create_number(env, DATA_IMAGE));
+  napi_set_property(env, ctor, napi_property_name(env, "MODE_MIME"),
+    napi_create_number(env, DATA_MIME));
+#endif
+
+  napi_set_property(env, target, napi_property_name(env, "Image"), ctor);
+  constructor = napi_create_persistent(env, ctor);
 }
 
 /*
  * Initialize a new Image.
  */
 
-NAN_METHOD(Image::New) {
-  if (!info.IsConstructCall()) {
-    return Nan::ThrowTypeError("Class constructors cannot be invoked without 'new'");
+NAPI_METHOD(Image::New) {
+  if (!napi_is_construct_call(env, info)) {
+    napi_throw_type_error(env, "Class constructors cannot be invoked without 'new'");
+    return;
   }
 
+  napi_value wrapper = napi_get_cb_this(env, info);
   Image *img = new Image;
   img->data_mode = DATA_IMAGE;
-  img->Wrap(info.This());
-  info.GetReturnValue().Set(info.This());
+  napi_wrap(env, wrapper, img, nullptr, nullptr); // TODO: Destructor?
+  napi_set_return_value(env, info, wrapper);
 }
 
 /*
  * Get complete boolean.
  */
 
-NAN_GETTER(Image::GetComplete) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Boolean>(Image::COMPLETE == img->state));
+NAPI_GETTER(Image::GetComplete) {
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
+  napi_set_return_value(env, info,
+    napi_create_boolean(env, Image::COMPLETE == img->state));
 }
 
 #if CAIRO_VERSION_MINOR >= 10
@@ -89,19 +97,25 @@ NAN_GETTER(Image::GetComplete) {
  * Get dataMode.
  */
 
-NAN_GETTER(Image::GetDataMode) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(img->data_mode));
+NAPI_GETTER(Image::GetDataMode) {
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
+  napi_set_return_value(env, info,
+    napi_create_number(env, img->data_mode));
 }
 
 /*
  * Set dataMode.
  */
 
-NAN_SETTER(Image::SetDataMode) {
-  if (value->IsNumber()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    int mode = value->Uint32Value();
+NAPI_SETTER(Image::SetDataMode) {
+  napi_value value;
+  napi_get_cb_args(env, info, &value, 1);
+
+  if (napi_get_type_of_value(env, value) == napi_number) {
+    Image* img = reinterpret_cast<Image*>(
+      napi_unwrap(env, napi_get_cb_this(env, info)));
+    int mode = napi_get_value_uint32(env, value);
     img->data_mode = (data_mode_t) mode;
   }
 }
@@ -112,26 +126,32 @@ NAN_SETTER(Image::SetDataMode) {
  * Get width.
  */
 
-NAN_GETTER(Image::GetWidth) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(img->width));
+NAPI_GETTER(Image::GetWidth) {
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
+  napi_set_return_value(env, info,
+    napi_create_number(env, img->width));
 }
 /*
  * Get height.
  */
 
-NAN_GETTER(Image::GetHeight) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(img->height));
+NAPI_GETTER(Image::GetHeight) {
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
+  napi_set_return_value(env, info,
+    napi_create_number(env, img->height));
 }
 
 /*
  * Get src path.
  */
 
-NAN_GETTER(Image::GetSource) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<String>(img->filename ? img->filename : "").ToLocalChecked());
+NAPI_GETTER(Image::GetSource) {
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
+  napi_set_return_value(env, info,
+    napi_create_string(env, img->filename ? img->filename : ""));
 }
 
 /*
@@ -142,7 +162,7 @@ void
 Image::clearData() {
   if (_surface) {
     cairo_surface_destroy(_surface);
-    Nan::AdjustExternalMemory(-_data_len);
+    //Nan::AdjustExternalMemory(-_data_len); // TODO: napi_adjust_external_memory ??
     _data_len = 0;
     _surface = NULL;
   }
@@ -161,22 +181,26 @@ Image::clearData() {
  * Set src path.
  */
 
-NAN_SETTER(Image::SetSource) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
+NAPI_SETTER(Image::SetSource) {
+  napi_value value;
+  napi_get_cb_args(env, info, &value, 1);
+
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
   cairo_status_t status = CAIRO_STATUS_READ_ERROR;
 
   img->clearData();
 
   // url string
-  if (value->IsString()) {
-    String::Utf8Value src(value);
+  if (napi_get_type_of_value(env, value) == napi_string) {
+    Napi::Utf8String src(value);
     if (img->filename) free(img->filename);
     img->filename = strdup(*src);
     status = img->load();
   // Buffer
-  } else if (Buffer::HasInstance(value)) {
-    uint8_t *buf = (uint8_t *) Buffer::Data(value->ToObject());
-    unsigned len = Buffer::Length(value->ToObject());
+  } else if (napi_buffer_has_instance(env, value)) {
+    uint8_t *buf = (uint8_t *) napi_buffer_data(env, value);
+    unsigned len = napi_buffer_length(env, value);
     status = img->loadFromBuffer(buf, len);
   }
 
@@ -252,12 +276,13 @@ Image::readPNG(void *c, uint8_t *data, unsigned int len) {
  * Get onload callback.
  */
 
-NAN_GETTER(Image::GetOnload) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
+NAPI_GETTER(Image::GetOnload) {
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
   if (img->onload) {
-    info.GetReturnValue().Set(img->onload->GetFunction());
+    napi_set_return_value(env, info, img->onload->GetFunction());
   } else {
-    info.GetReturnValue().SetNull();
+    napi_set_return_value(env, info, napi_get_null(env));
   }
 }
 
@@ -265,12 +290,17 @@ NAN_GETTER(Image::GetOnload) {
  * Set onload callback.
  */
 
-NAN_SETTER(Image::SetOnload) {
-  if (value->IsFunction()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    img->onload = new Nan::Callback(value.As<Function>());
-  } else if (value->IsNull()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
+NAPI_SETTER(Image::SetOnload) {
+  napi_value value;
+  napi_get_cb_args(env, info, &value, 1);
+
+  if (napi_get_type_of_value(env, value) == napi_function) {
+    Image* img = reinterpret_cast<Image*>(
+      napi_unwrap(env, napi_get_cb_this(env, info)));
+    img->onload = new Napi::Callback(value);
+  } else if (napi_get_type_of_value(env, value) == napi_null) {
+    Image* img = reinterpret_cast<Image*>(
+      napi_unwrap(env, napi_get_cb_this(env, info)));
     if (img->onload) {
       delete img->onload;
     }
@@ -282,12 +312,13 @@ NAN_SETTER(Image::SetOnload) {
  * Get onerror callback.
  */
 
-NAN_GETTER(Image::GetOnerror) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
+NAPI_GETTER(Image::GetOnerror) {
+  Image* img = reinterpret_cast<Image*>(
+    napi_unwrap(env, napi_get_cb_this(env, info)));
   if (img->onerror) {
-    info.GetReturnValue().Set(img->onerror->GetFunction());
+    napi_set_return_value(env, info, img->onerror->GetFunction());
   } else {
-    info.GetReturnValue().SetNull();
+    napi_set_return_value(env, info, napi_get_null(env));
   }
 }
 
@@ -295,12 +326,17 @@ NAN_GETTER(Image::GetOnerror) {
  * Set onerror callback.
  */
 
-NAN_SETTER(Image::SetOnerror) {
-  if (value->IsFunction()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    img->onerror = new Nan::Callback(value.As<Function>());
-  } else if (value->IsNull()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
+NAPI_SETTER(Image::SetOnerror) {
+  napi_value value;
+  napi_get_cb_args(env, info, &value, 1);
+
+  if (napi_get_type_of_value(env, value) == napi_function) {
+    Image* img = reinterpret_cast<Image*>(
+      napi_unwrap(env, napi_get_cb_this(env, info)));
+    img->onerror = new Napi::Callback(value);
+  } else if (napi_get_type_of_value(env, value) == napi_null) {
+    Image* img = reinterpret_cast<Image*>(
+      napi_unwrap(env, napi_get_cb_this(env, info)));
     if (img->onerror) {
         delete img->onerror;
     }
@@ -360,13 +396,13 @@ Image::load() {
 
 void
 Image::loaded() {
-  Nan::HandleScope scope;
+  Napi::HandleScope scope;
   state = COMPLETE;
 
   width = cairo_image_surface_get_width(_surface);
   height = cairo_image_surface_get_height(_surface);
   _data_len = height * cairo_image_surface_get_stride(_surface);
-  Nan::AdjustExternalMemory(_data_len);
+  // Nan::AdjustExternalMemory(_data_len); // TODO: napi_adjust_external_memory ??
 
   if (onload != NULL) {
     onload->Call(0, NULL);
@@ -378,10 +414,10 @@ Image::loaded() {
  */
 
 void
-Image::error(Local<Value> err) {
-  Nan::HandleScope scope;
+Image::error(napi_value err) {
+  Napi::HandleScope scope;
   if (onerror != NULL) {
-    Local<Value> argv[1] = { err };
+    napi_value argv[1] = { err };
     onerror->Call(1, argv);
   }
 }
@@ -810,7 +846,7 @@ Image::decodeJPEGBufferIntoMimeSurface(uint8_t *buf, unsigned len) {
 
 void
 clearMimeData(void *closure) {
-  Nan::AdjustExternalMemory(-((read_closure_t *)closure)->len);
+  // Nan::AdjustExternalMemory(-((read_closure_t *)closure)->len); // TODO: napi_adjust_memory ??
   free(((read_closure_t *) closure)->buf);
   free(closure);
 }
@@ -837,7 +873,7 @@ Image::assignDataAsMime(uint8_t *data, int len, const char *mime_type) {
   mime_closure->buf = mime_data;
   mime_closure->len = len;
 
-  Nan::AdjustExternalMemory(len);
+  // Nan::AdjustExternalMemory(len); // TODO: napi_adjust_memory ??
 
   return cairo_surface_set_mime_data(_surface
     , mime_type

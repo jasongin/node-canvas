@@ -22,15 +22,16 @@
 #define snprintf _snprintf
 #endif
 
-NAN_MODULE_INIT(init) {
-  Canvas::Initialize(target);
-  Image::Initialize(target);
-  ImageData::Initialize(target);
-  Context2d::Initialize(target);
-  Gradient::Initialize(target);
-  Pattern::Initialize(target);
+NAPI_MODULE_INIT(init) {
+  Canvas::Initialize(env, exports);
+  Image::Initialize(env, exports);
+  ImageData::Initialize(env, exports);
+  Context2d::Initialize(env, exports);
+  Gradient::Initialize(env, exports);
+  Pattern::Initialize(env, exports);
 
-  target->Set(Nan::New<String>("cairoVersion").ToLocalChecked(), Nan::New<String>(cairo_version_string()).ToLocalChecked());
+  napi_value version = napi_create_string(env, cairo_version_string());
+  napi_set_property(env, exports, napi_property_name(env, "cairoVersion"), version);
 #ifdef HAVE_JPEG
 
 #ifndef JPEG_LIB_VERSION_MAJOR
@@ -55,22 +56,26 @@ NAN_MODULE_INIT(init) {
   } else {
     snprintf(jpeg_version, 10, "%d", JPEG_LIB_VERSION_MAJOR);
   }
-  target->Set(Nan::New<String>("jpegVersion").ToLocalChecked(), Nan::New<String>(jpeg_version).ToLocalChecked());
+  version = napi_create_string(env, jpeg_version);
+  napi_set_property(env, exports, napi_property_name(env, "jpegVersion"), version);
 #endif
 
 #ifdef HAVE_GIF
 #ifndef GIF_LIB_VERSION
   char gif_version[10];
   snprintf(gif_version, 10, "%d.%d.%d", GIFLIB_MAJOR, GIFLIB_MINOR, GIFLIB_RELEASE);
-  target->Set(Nan::New<String>("gifVersion").ToLocalChecked(), Nan::New<String>(gif_version).ToLocalChecked());
+  version = napi_create_string(env, gif_version);
+  napi_set_property(env, exports, napi_property_name(env, "gifVersion"), version);
 #else
-  target->Set(Nan::New<String>("gifVersion").ToLocalChecked(), Nan::New<String>(GIF_LIB_VERSION).ToLocalChecked());
+  version = napi_create_string(env, GIF_LIB_VERSION);
+  napi_set_property(env, exports, napi_property_name(env, "gifVersion"), version);
 #endif
 #endif
 
   char freetype_version[10];
   snprintf(freetype_version, 10, "%d.%d.%d", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
-  target->Set(Nan::New<String>("freetypeVersion").ToLocalChecked(), Nan::New<String>(freetype_version).ToLocalChecked());
+  version = napi_create_string(env, freetype_version);
+  napi_set_property(env, exports, napi_property_name(env, "freetypeVersion"), version);
 }
 
-NODE_MODULE(canvas,init);
+NODE_MODULE_ABI(canvas, init);

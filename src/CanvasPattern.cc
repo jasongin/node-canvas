@@ -9,63 +9,59 @@
 #include "Image.h"
 #include "CanvasPattern.h"
 
-Nan::Persistent<FunctionTemplate> Pattern::constructor;
+napi_persistent Pattern::constructor;
 
 /*
  * Initialize CanvasPattern.
  */
 
 void
-Pattern::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
-  Nan::HandleScope scope;
+Pattern::Initialize(napi_env env, napi_value target) {
+  Napi::HandleScope scope;
 
-  // Constructor
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(Pattern::New);
-  constructor.Reset(ctor);
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("CanvasPattern").ToLocalChecked());
-
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("CanvasPattern").ToLocalChecked());
-
-  // Prototype
-  Nan::Set(target, Nan::New("CanvasPattern").ToLocalChecked(), ctor->GetFunction());
+  napi_value ctor = napi_create_constructor(
+    env, "CanvasPattern", Pattern::New, nullptr, 0, nullptr);
+  constructor = napi_create_persistent(env, ctor);
 }
 
 /*
  * Initialize a new CanvasPattern.
  */
 
-NAN_METHOD(Pattern::New) {
-  if (!info.IsConstructCall()) {
-    return Nan::ThrowTypeError("Class constructors cannot be invoked without 'new'");
+NAPI_METHOD(Pattern::New) {
+  if (!napi_is_construct_call(env, info)) {
+    napi_throw_type_error(env, "Class constructors cannot be invoked without 'new'");
+    return;
   }
 
   cairo_surface_t *surface;
 
-  Local<Object> obj = info[0]->ToObject();
+  napi_value obj;
+  napi_get_cb_args(env, info, &obj, 1);
 
-  // Image
-  if (Nan::New(Image::constructor)->HasInstance(obj)) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(obj);
+  if (napi_instanceof(env, obj, napi_get_persistent_value(env, Image::constructor))) {
+    Image *img = static_cast<Image*>(napi_unwrap(env, obj));
     if (!img->isComplete()) {
-      return Nan::ThrowError("Image given has not completed loading");
+      napi_throw_error(env, "Image given has not completed loading");
+      return;
     }
     surface = img->surface();
 
   // Canvas
-  } else if (Nan::New(Canvas::constructor)->HasInstance(obj)) {
-    Canvas *canvas = Nan::ObjectWrap::Unwrap<Canvas>(obj);
+  } else if (napi_instanceof(env, obj, napi_get_persistent_value(env, Canvas::constructor))) {
+    Canvas *canvas = static_cast<Canvas*>(napi_unwrap(env, obj));
     surface = canvas->surface();
 
   // Invalid
   } else {
-    return Nan::ThrowTypeError("Image or Canvas expected");
+    napi_throw_type_error(env, "Image or Canvas expected");
+    return;
   }
 
+  napi_value wrapper = napi_get_cb_this(env, info);
   Pattern *pattern = new Pattern(surface);
-  pattern->Wrap(info.This());
-  info.GetReturnValue().Set(info.This());
+  napi_wrap(env, wrapper, pattern, nullptr, nullptr); // TODO: Destructor?
+  napi_set_return_value(env, info, wrapper);
 }
 
 

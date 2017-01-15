@@ -29,17 +29,19 @@ init_closure_destination(j_compress_ptr cinfo){
 
 boolean
 empty_closure_output_buffer(j_compress_ptr cinfo){
-  Nan::HandleScope scope;
+  Napi::HandleScope scope;
   closure_destination_mgr *dest = (closure_destination_mgr *) cinfo->dest;
 
-  Local<Object> buf = Nan::NewBuffer((char *)dest->buffer, dest->bufsize).ToLocalChecked();
+  napi_env env = napi_get_current_env();
+
+  napi_value buf = napi_buffer_new(env, (char *)dest->buffer, dest->bufsize);
 
   // emit "data"
-  Local<Value> argv[2] = {
-      Nan::Null()
-    , buf
+  napi_value argv[2] = {
+    napi_get_null(env),
+    buf,
   };
-  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), (v8::Local<v8::Function>)dest->closure->fn, 2, argv);
+  napi_make_callback(env, napi_get_global_scope(env), dest->closure->fn, 2, argv);
 
   dest->buffer = (JOCTET *)malloc(dest->bufsize);
   cinfo->dest->next_output_byte = dest->buffer;
@@ -49,26 +51,28 @@ empty_closure_output_buffer(j_compress_ptr cinfo){
 
 void
 term_closure_destination(j_compress_ptr cinfo){
-  Nan::HandleScope scope;
+  Napi::HandleScope scope;
   closure_destination_mgr *dest = (closure_destination_mgr *) cinfo->dest;
 
-  /* emit remaining data */
-  Local<Object> buf = Nan::NewBuffer((char *)dest->buffer, dest->bufsize - dest->pub.free_in_buffer).ToLocalChecked();
+  napi_env env = napi_get_current_env();
 
-  Local<Value> data_argv[2] = {
-      Nan::Null()
-    , buf
+  /* emit remaining data */
+  napi_value buf = napi_buffer_new(env, (char *)dest->buffer, dest->bufsize - dest->pub.free_in_buffer);
+
+  napi_value data_argv[2] = {
+    napi_get_null(env),
+    buf,
   };
 
-  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), (v8::Local<v8::Function>)dest->closure->fn, 2, data_argv);
+  napi_make_callback(env, napi_get_global_scope(env), dest->closure->fn, 2, data_argv);
 
   // emit "end"
-  Local<Value> end_argv[2] = {
-      Nan::Null()
-    , Nan::Null()
+  napi_value end_argv[2] = {
+    napi_get_null(env),
+    napi_get_null(env),
   };
 
-  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), (v8::Local<v8::Function>)dest->closure->fn, 2, end_argv);
+  napi_make_callback(env, napi_get_global_scope(env), dest->closure->fn, 2, end_argv);
 }
 
 void

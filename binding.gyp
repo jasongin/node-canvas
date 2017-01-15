@@ -36,7 +36,9 @@
               '<(GTK_Root)/bin/libgobject-2.0-0.dll',
               '<(GTK_Root)/bin/libgmodule-2.0-0.dll',
               '<(GTK_Root)/bin/libgthread-2.0-0.dll',
-              '<(GTK_Root)/bin/libexpat-1.dll'
+              '<(GTK_Root)/bin/libexpat-1.dll',
+              '<(jpeg_root)/bin/jpeg62.dll',
+              '<(jpeg_root)/bin/turbojpeg.dll'
             ]
           }]
         }]
@@ -44,7 +46,7 @@
     },
     {
       'target_name': 'canvas',
-      'include_dirs': ["<!(node -e \"require('nan')\")"],
+      'include_dirs': ["<!(node -e \"require('napi')\")"],
       'sources': [
         'src/Canvas.cc',
         'src/CanvasGradient.cc',
@@ -73,7 +75,8 @@
             '<(GTK_Root)/include/pango-1.0',
             '<(GTK_Root)/include/glib-2.0',
             '<(GTK_Root)/include/freetype2',
-            '<(GTK_Root)/lib/glib-2.0/include'
+            '<(GTK_Root)/lib/glib-2.0/include',
+            '<(jpeg_root)/include'
           ],
           'defines': [
             '_USE_MATH_DEFINES' # for M_PI
@@ -120,7 +123,7 @@
           'conditions': [
             ['OS=="win"', {
               'libraries': [
-                '-l<(GTK_Root)/lib/jpeg.lib'
+                '-l<(jpeg_root)/lib/jpeg.lib'
               ]
             }, {
               'libraries': [

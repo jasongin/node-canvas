@@ -10,18 +10,18 @@
 
 #include "Canvas.h"
 
-class Gradient: public Nan::ObjectWrap {
+class Gradient: public Napi::ObjectWrap<Gradient> {
   public:
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
-    static NAN_METHOD(AddColorStop);
+    explicit Gradient(const Napi::CallbackInfo& info);
+    ~Gradient();
+    static Napi::Reference<Napi::Function> constructor;
+    static void Initialize(Napi::Env& env, Napi::Object& target);
+    void AddColorStop(const Napi::CallbackInfo& info);
     Gradient(double x0, double y0, double x1, double y1);
     Gradient(double x0, double y0, double r0, double x1, double y1, double r1);
     inline cairo_pattern_t *pattern(){ return _pattern; }
 
   private:
-    ~Gradient();
     cairo_pattern_t *_pattern;
 };
 

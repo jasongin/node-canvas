@@ -9,91 +9,77 @@
 #include "Canvas.h"
 #include "CanvasGradient.h"
 
-Nan::Persistent<FunctionTemplate> Gradient::constructor;
+Napi::Reference<Napi::Function> Gradient::constructor;
 
 /*
  * Initialize CanvasGradient.
  */
 
 void
-Gradient::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
-  Nan::HandleScope scope;
+Gradient::Initialize(Napi::Env& env, Napi::Object& target) {
+  Napi::HandleScope scope(env);
 
-  // Constructor
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(Gradient::New);
-  constructor.Reset(ctor);
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("CanvasGradient").ToLocalChecked());
+  Napi::Function ctor = DefineClass(env, "CanvasGradient", {
+    InstanceMethod("addColorStop", &AddColorStop),
+  });
 
-  // Prototype
-  Nan::SetPrototypeMethod(ctor, "addColorStop", AddColorStop);
-  Nan::Set(target, Nan::New("CanvasGradient").ToLocalChecked(), ctor->GetFunction());
+  constructor = Napi::Persistent(ctor);
+  constructor.SuppressDestruct();
+  target.Set("CanvasGradient", ctor);
 }
 
 /*
  * Initialize a new CanvasGradient.
  */
 
-NAN_METHOD(Gradient::New) {
-  if (!info.IsConstructCall()) {
-    return Nan::ThrowTypeError("Class constructors cannot be invoked without 'new'");
-  }
-
+Gradient::Gradient(const Napi::CallbackInfo& info) {
   // Linear
   if (4 == info.Length()) {
-    Gradient *grad = new Gradient(
-        info[0]->NumberValue()
-      , info[1]->NumberValue()
-      , info[2]->NumberValue()
-      , info[3]->NumberValue());
-    grad->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
-    return;
+    _pattern = cairo_pattern_create_linear(
+        info[0].As<Napi::Number>()
+      , info[1].As<Napi::Number>()
+      , info[2].As<Napi::Number>()
+      , info[3].As<Napi::Number>());
   }
-
   // Radial
-  if (6 == info.Length()) {
-    Gradient *grad = new Gradient(
-        info[0]->NumberValue()
-      , info[1]->NumberValue()
-      , info[2]->NumberValue()
-      , info[3]->NumberValue()
-      , info[4]->NumberValue()
-      , info[5]->NumberValue());
-    grad->Wrap(info.This());
-    info.GetReturnValue().Set(info.This());
-    return;
+  else if (6 == info.Length()) {
+    _pattern = cairo_pattern_create_radial(
+        info[0].As<Napi::Number>()
+      , info[1].As<Napi::Number>()
+      , info[2].As<Napi::Number>()
+      , info[3].As<Napi::Number>()
+      , info[4].As<Napi::Number>()
+      , info[5].As<Napi::Number>());
   }
-
-  return Nan::ThrowTypeError("invalid arguments");
+  else {
+    throw Napi::TypeError::New(info.Env(), "invalid arguments");
+  }
 }
 
 /*
  * Add color stop.
  */
 
-NAN_METHOD(Gradient::AddColorStop) {
-  if (!info[0]->IsNumber())
-    return Nan::ThrowTypeError("offset required");
-  if (!info[1]->IsString())
-    return Nan::ThrowTypeError("color string required");
+void Gradient::AddColorStop(const Napi::CallbackInfo& info) {
+  if (napi_number != info[0].Type())
+    throw Napi::TypeError::New(info.Env(),"offset required");
+  if (napi_string != info[1].Type())
+    throw Napi::TypeError::New(info.Env(),"color string required");
 
-  Gradient *grad = Nan::ObjectWrap::Unwrap<Gradient>(info.This());
   short ok;
-  String::Utf8Value str(info[1]);
-  uint32_t rgba = rgba_from_string(*str, &ok);
+  uint32_t rgba = rgba_from_string(info[1].As<Napi::String>().Utf8Value().c_str(), &ok);
 
   if (ok) {
     rgba_t color = rgba_create(rgba);
     cairo_pattern_add_color_stop_rgba(
-        grad->pattern()
-      , info[0]->NumberValue()
+        this->pattern()
+      , info[0].As<Napi::Number>()
       , color.r
       , color.g
       , color.b
       , color.a);
   } else {
-    return Nan::ThrowTypeError("parse color failed");
+    throw Napi::TypeError::New(info.Env(),"parse color failed");
   }
 }
 

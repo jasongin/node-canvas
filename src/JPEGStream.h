@@ -29,17 +29,17 @@ init_closure_destination(j_compress_ptr cinfo){
 
 boolean
 empty_closure_output_buffer(j_compress_ptr cinfo){
-  Nan::HandleScope scope;
-  closure_destination_mgr *dest = (closure_destination_mgr *) cinfo->dest;
+  closure_destination_mgr *dest = (closure_destination_mgr *)cinfo->dest;
+  Napi::Env env = dest->closure->canvas->Env();
+  Napi::HandleScope scope(env);
 
-  Local<Object> buf = Nan::NewBuffer((char *)dest->buffer, dest->bufsize).ToLocalChecked();
+  Napi::Value buf = Napi::Buffer::New(env, (char *)dest->buffer, dest->bufsize, nullptr);
 
   // emit "data"
-  Local<Value> argv[2] = {
-      Nan::Null()
-    , buf
-  };
-  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), (v8::Local<v8::Function>)dest->closure->fn, 2, argv);
+  dest->closure->fn.MakeCallback({
+    env.Null(),
+    buf,
+  });
 
   dest->buffer = (JOCTET *)malloc(dest->bufsize);
   cinfo->dest->next_output_byte = dest->buffer;
@@ -49,26 +49,23 @@ empty_closure_output_buffer(j_compress_ptr cinfo){
 
 void
 term_closure_destination(j_compress_ptr cinfo){
-  Nan::HandleScope scope;
-  closure_destination_mgr *dest = (closure_destination_mgr *) cinfo->dest;
+  closure_destination_mgr *dest = (closure_destination_mgr *)cinfo->dest;
+  Napi::Env env = dest->closure->canvas->Env();
+  Napi::HandleScope scope(env);
 
   /* emit remaining data */
-  Local<Object> buf = Nan::NewBuffer((char *)dest->buffer, dest->bufsize - dest->pub.free_in_buffer).ToLocalChecked();
+  Napi::Value buf = Napi::Buffer::New(env, (char *)dest->buffer, dest->bufsize - dest->pub.free_in_buffer, nullptr);
 
-  Local<Value> data_argv[2] = {
-      Nan::Null()
-    , buf
-  };
-
-  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), (v8::Local<v8::Function>)dest->closure->fn, 2, data_argv);
+  dest->closure->fn.MakeCallback({
+    env.Null(),
+    buf,
+  });
 
   // emit "end"
-  Local<Value> end_argv[2] = {
-      Nan::Null()
-    , Nan::Null()
-  };
-
-  Nan::MakeCallback(Nan::GetCurrentContext()->Global(), (v8::Local<v8::Function>)dest->closure->fn, 2, end_argv);
+  dest->closure->fn.MakeCallback({
+    env.Null(),
+    env.Null(),
+  });
 }
 
 void

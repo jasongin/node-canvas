@@ -29,7 +29,7 @@
     "test-server": "node test/server.js"
   },
   "dependencies": {
-    "nan": "^2.4.0"
+    "napi": "github:jasongin/abi-stable-node-wrapper#canvas"
   },
   "devDependencies": {
     "express": "^4.14.0",

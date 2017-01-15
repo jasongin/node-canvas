@@ -9,63 +9,49 @@
 #include "Image.h"
 #include "CanvasPattern.h"
 
-Nan::Persistent<FunctionTemplate> Pattern::constructor;
+Napi::Reference<Napi::Function> Pattern::constructor;
 
 /*
  * Initialize CanvasPattern.
  */
 
 void
-Pattern::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
-  Nan::HandleScope scope;
+Pattern::Initialize(Napi::Env& env, Napi::Object& target) {
+  Napi::HandleScope scope(env);
 
-  // Constructor
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(Pattern::New);
-  constructor.Reset(ctor);
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("CanvasPattern").ToLocalChecked());
-
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("CanvasPattern").ToLocalChecked());
-
-  // Prototype
-  Nan::Set(target, Nan::New("CanvasPattern").ToLocalChecked(), ctor->GetFunction());
+  Napi::Function ctor = DefineClass(env, "CanvasPattern", {});
+  constructor = Napi::Persistent(ctor);
+  constructor.SuppressDestruct();
+  target.Set("CanvasPattern", ctor);
 }
 
 /*
  * Initialize a new CanvasPattern.
  */
 
-NAN_METHOD(Pattern::New) {
-  if (!info.IsConstructCall()) {
-    return Nan::ThrowTypeError("Class constructors cannot be invoked without 'new'");
-  }
-
+Pattern::Pattern(const Napi::CallbackInfo& info) {
   cairo_surface_t *surface;
 
-  Local<Object> obj = info[0]->ToObject();
+  Napi::Object obj = info[0].As<Napi::Object>();
 
-  // Image
-  if (Nan::New(Image::constructor)->HasInstance(obj)) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(obj);
+  if (obj.InstanceOf(Image::constructor.Value().As<Napi::Function>())) {
+    Image *img = Image::Unwrap(obj);
     if (!img->isComplete()) {
-      return Nan::ThrowError("Image given has not completed loading");
+      throw Napi::Error::New(info.Env(), "Image given has not completed loading");
     }
     surface = img->surface();
 
   // Canvas
-  } else if (Nan::New(Canvas::constructor)->HasInstance(obj)) {
-    Canvas *canvas = Nan::ObjectWrap::Unwrap<Canvas>(obj);
+  } else if (obj.InstanceOf(Canvas::constructor.Value().As<Napi::Function>())) {
+    Canvas *canvas = Canvas::Unwrap(obj);
     surface = canvas->surface();
 
   // Invalid
   } else {
-    return Nan::ThrowTypeError("Image or Canvas expected");
+    throw Napi::TypeError::New(info.Env(), "Image or Canvas expected");
   }
 
-  Pattern *pattern = new Pattern(surface);
-  pattern->Wrap(info.This());
-  info.GetReturnValue().Set(info.This());
+  _pattern = cairo_pattern_create_for_surface(surface);
 }
 
 

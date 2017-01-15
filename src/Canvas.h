@@ -8,18 +8,13 @@
 #ifndef __NODE_CANVAS_H__
 #define __NODE_CANVAS_H__
 
-#include <node.h>
-#include <v8.h>
-#include <node_object_wrap.h>
+#include <napi.h>
+#include <uv.h>
 #include <node_version.h>
 #include <pango/pangocairo.h>
 #include <vector>
 #include <cairo.h>
-#include <nan.h>
 
-
-using namespace node;
-using namespace v8;
 
 /*
  * Maxmimum states per context.
@@ -54,26 +49,27 @@ class FontFace {
  * Canvas.
  */
 
-class Canvas: public Nan::ObjectWrap {
+class Canvas: public Napi::ObjectWrap<Canvas> {
   public:
+    Canvas(const Napi::CallbackInfo& info);
+    ~Canvas();
     int width;
     int height;
     canvas_type_t type;
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
-    static NAN_METHOD(ToBuffer);
-    static NAN_GETTER(GetType);
-    static NAN_GETTER(GetStride);
-    static NAN_GETTER(GetWidth);
-    static NAN_GETTER(GetHeight);
-    static NAN_SETTER(SetWidth);
-    static NAN_SETTER(SetHeight);
-    static NAN_METHOD(StreamPNGSync);
-    static NAN_METHOD(StreamPDFSync);
-    static NAN_METHOD(StreamJPEGSync);
-    static NAN_METHOD(RegisterFont);
-    static Local<Value> Error(cairo_status_t status);
+    static Napi::Reference<Napi::Function> constructor;
+    static void Initialize(Napi::Env& env, Napi::Object& target);
+    Napi::Value ToBuffer(const Napi::CallbackInfo& info);
+    Napi::Value GetType(const Napi::CallbackInfo& info);
+    Napi::Value GetStride(const Napi::CallbackInfo& info);
+    Napi::Value GetWidth(const Napi::CallbackInfo& info);
+    Napi::Value GetHeight(const Napi::CallbackInfo& info);
+    void SetWidth(const Napi::CallbackInfo& info, const Napi::Value& value);
+    void SetHeight(const Napi::CallbackInfo& info, const Napi::Value& value);
+    void StreamPNGSync(const Napi::CallbackInfo& info);
+    void StreamPDFSync(const Napi::CallbackInfo& info);
+    void StreamJPEGSync(const Napi::CallbackInfo& info);
+    static void RegisterFont(const Napi::CallbackInfo& info);
+    static Napi::Value Error(Napi::Env env, cairo_status_t status);
 #if NODE_VERSION_AT_LEAST(0, 6, 0)
     static void ToBufferAsync(uv_work_t *req);
     static void ToBufferAsyncAfter(uv_work_t *req);
@@ -99,10 +95,10 @@ class Canvas: public Nan::ObjectWrap {
     inline int stride(){ return cairo_image_surface_get_stride(_surface); }
     inline int nBytes(){ return height * stride(); }
     Canvas(int width, int height, canvas_type_t type);
-    void resurface(Local<Object> canvas);
+    void init(int width, int height, canvas_type_t type);
+    void resurface();
 
   private:
-    ~Canvas();
     cairo_surface_t *_surface;
     void *_closure;
     static std::vector<FontFace> _font_face_list;

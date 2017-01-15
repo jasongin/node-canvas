@@ -16,15 +16,13 @@
   #define PAGE_SIZE 4096
 #endif
 
-#include <nan.h>
-
 /*
  * PNG stream closure.
  */
 
-typedef struct {
-  Nan::Callback *pfn;
-  Local<Function> fn;
+typedef struct closure_t {
+  Napi::Reference<Napi::Function>* pfn;
+  Napi::Function fn;
   unsigned len;
   unsigned max_len;
   uint8_t *data;
@@ -58,7 +56,7 @@ void
 closure_destroy(closure_t *closure) {
   if (closure->len) {
     free(closure->data);
-    Nan::AdjustExternalMemory(-((intptr_t) closure->max_len));
+    // Nan::AdjustExternalMemory(-((intptr_t) closure->max_len)); // TODO: napi_adjust_memory ??
   }
 }
 

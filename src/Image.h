@@ -27,26 +27,27 @@
 
 
 
-class Image: public Nan::ObjectWrap {
+class Image : public Napi::ObjectWrap<Image> {
   public:
+    explicit Image(const Napi::CallbackInfo& info);
+    ~Image();
     char *filename;
     int width, height;
-    Nan::Callback *onload;
-    Nan::Callback *onerror;
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
-    static NAN_GETTER(GetSource);
-    static NAN_GETTER(GetOnload);
-    static NAN_GETTER(GetOnerror);
-    static NAN_GETTER(GetComplete);
-    static NAN_GETTER(GetWidth);
-    static NAN_GETTER(GetHeight);
-    static NAN_GETTER(GetDataMode);
-    static NAN_SETTER(SetSource);
-    static NAN_SETTER(SetOnload);
-    static NAN_SETTER(SetOnerror);
-    static NAN_SETTER(SetDataMode);
+    Napi::Reference<Napi::Function> onload;
+    Napi::Reference<Napi::Function> onerror;
+    static Napi::Reference<Napi::Function> constructor;
+    static void Initialize(Napi::Env& env, Napi::Object& target);
+    Napi::Value GetSource(const Napi::CallbackInfo& info);
+    Napi::Value GetOnload(const Napi::CallbackInfo& info);
+    Napi::Value GetOnerror(const Napi::CallbackInfo& info);
+    Napi::Value GetComplete(const Napi::CallbackInfo& info);
+    Napi::Value GetWidth(const Napi::CallbackInfo& info);
+    Napi::Value GetHeight(const Napi::CallbackInfo& info);
+    Napi::Value GetDataMode(const Napi::CallbackInfo& info);
+    void SetSource(const Napi::CallbackInfo& info, const Napi::Value& value);
+    void SetOnload(const Napi::CallbackInfo& info, const Napi::Value& value);
+    void SetOnerror(const Napi::CallbackInfo& info, const Napi::Value& value);
+    void SetDataMode(const Napi::CallbackInfo& info, const Napi::Value& value);
     inline cairo_surface_t *surface(){ return _surface; }
     inline uint8_t *data(){ return cairo_image_surface_get_data(_surface); }
     inline int stride(){ return cairo_image_surface_get_stride(_surface); }
@@ -73,8 +74,8 @@ class Image: public Nan::ObjectWrap {
     cairo_status_t assignDataAsMime(uint8_t *data, int len, const char *mime_type);
 #endif
 #endif
-    void error(Local<Value> error);
-    void loaded();
+    void error(Napi::Value error);
+    void loaded(Napi::Env env);
     cairo_status_t load();
     Image();
 
@@ -102,7 +103,6 @@ class Image: public Nan::ObjectWrap {
     cairo_surface_t *_surface;
     uint8_t *_data;
     int _data_len;
-    ~Image();
 };
 
 #endif

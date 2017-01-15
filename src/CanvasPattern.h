@@ -10,16 +10,16 @@
 
 #include "Canvas.h"
 
-class Pattern: public Nan::ObjectWrap {
+class Pattern: public Napi::ObjectWrap<Pattern> {
   public:
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
+    explicit Pattern(const Napi::CallbackInfo& info);
+    ~Pattern();
+    static Napi::Reference<Napi::Function> constructor;
+    static void Initialize(Napi::Env& env, Napi::Object& target);
     Pattern(cairo_surface_t *surface);
-    inline cairo_pattern_t *pattern(){ return _pattern; }
+    inline cairo_pattern_t *pattern() { return _pattern; }
 
   private:
-    ~Pattern();
     // TODO REPEAT/REPEAT_X/REPEAT_Y
     cairo_pattern_t *_pattern;
 };

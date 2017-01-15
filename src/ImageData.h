@@ -12,13 +12,13 @@
 #include <stdlib.h>
 #include <v8.h>
 
-class ImageData: public Nan::ObjectWrap {
+class ImageData: public Napi::ObjectWrap<ImageData> {
   public:
-    static Nan::Persistent<FunctionTemplate> constructor;
-    static void Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target);
-    static NAN_METHOD(New);
-    static NAN_GETTER(GetWidth);
-    static NAN_GETTER(GetHeight);
+    explicit ImageData(const Napi::CallbackInfo& info);
+    static Napi::Reference<Napi::Function> constructor;
+    static void Initialize(Napi::Env& env, Napi::Object& target);
+    Napi::Value GetWidth(const Napi::CallbackInfo& info);
+    Napi::Value GetHeight(const Napi::CallbackInfo& info);
 
     inline int width() { return _width; }
     inline int height() { return _height; }

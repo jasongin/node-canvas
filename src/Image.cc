@@ -28,59 +28,51 @@ typedef struct {
   uint8_t *buf;
 } read_closure_t;
 
-Nan::Persistent<FunctionTemplate> Image::constructor;
+Napi::Reference<Napi::Function> Image::constructor;
 
 /*
  * Initialize Image.
  */
 
 void
-Image::Initialize(Nan::ADDON_REGISTER_FUNCTION_ARGS_TYPE target) {
-  Nan::HandleScope scope;
+Image::Initialize(Napi::Env& env, Napi::Object& target) {
+  Napi::HandleScope scope(env);
 
-  Local<FunctionTemplate> ctor = Nan::New<FunctionTemplate>(Image::New);
-  constructor.Reset(ctor);
-  ctor->InstanceTemplate()->SetInternalFieldCount(1);
-  ctor->SetClassName(Nan::New("Image").ToLocalChecked());
-
-  // Prototype
-  Local<ObjectTemplate> proto = ctor->PrototypeTemplate();
-  Nan::SetAccessor(proto, Nan::New("source").ToLocalChecked(), GetSource, SetSource);
-  Nan::SetAccessor(proto, Nan::New("complete").ToLocalChecked(), GetComplete);
-  Nan::SetAccessor(proto, Nan::New("width").ToLocalChecked(), GetWidth);
-  Nan::SetAccessor(proto, Nan::New("height").ToLocalChecked(), GetHeight);
-  Nan::SetAccessor(proto, Nan::New("onload").ToLocalChecked(), GetOnload, SetOnload);
-  Nan::SetAccessor(proto, Nan::New("onerror").ToLocalChecked(), GetOnerror, SetOnerror);
+  Napi::Function ctor = DefineClass(env, "Image", {
+    InstanceAccessor("source", &GetSource, &SetSource),
+    InstanceAccessor("complete", &GetComplete, nullptr),
+    InstanceAccessor("width", &GetWidth, nullptr),
+    InstanceAccessor("height", &GetHeight, nullptr),
+    InstanceAccessor("onload", &GetOnload, &SetOnload),
+    InstanceAccessor("onerror", &GetOnerror, &SetOnerror),
 #if CAIRO_VERSION_MINOR >= 10
-  Nan::SetAccessor(proto, Nan::New("dataMode").ToLocalChecked(), GetDataMode, SetDataMode);
-  ctor->Set(Nan::New("MODE_IMAGE").ToLocalChecked(), Nan::New<Number>(DATA_IMAGE));
-  ctor->Set(Nan::New("MODE_MIME").ToLocalChecked(), Nan::New<Number>(DATA_MIME));
+    InstanceAccessor("dataMode", &GetDataMode, &SetDataMode),
 #endif
-  Nan::Set(target, Nan::New("Image").ToLocalChecked(), ctor->GetFunction());
+#if CAIRO_VERSION_MINOR >= 10
+    StaticValue("MODE_IMAGE", Napi::Number::New(env, DATA_IMAGE)),
+    StaticValue("MODE_MIME", Napi::Number::New(env, DATA_MIME)),
+#endif
+  });
+
+  constructor = Napi::Persistent(ctor);
+  constructor.SuppressDestruct();
+  target.Set("Image", ctor);
 }
 
 /*
  * Initialize a new Image.
  */
 
-NAN_METHOD(Image::New) {
-  if (!info.IsConstructCall()) {
-    return Nan::ThrowTypeError("Class constructors cannot be invoked without 'new'");
-  }
-
-  Image *img = new Image;
-  img->data_mode = DATA_IMAGE;
-  img->Wrap(info.This());
-  info.GetReturnValue().Set(info.This());
+Image::Image(const Napi::CallbackInfo& info) : Image() {
+  this->data_mode = DATA_IMAGE;
 }
 
 /*
  * Get complete boolean.
  */
 
-NAN_GETTER(Image::GetComplete) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Boolean>(Image::COMPLETE == img->state));
+Napi::Value Image::GetComplete(const Napi::CallbackInfo& info) {
+  return Napi::Boolean::New(info.Env(), Image::COMPLETE == this->state);
 }
 
 #if CAIRO_VERSION_MINOR >= 10
@@ -89,20 +81,17 @@ NAN_GETTER(Image::GetComplete) {
  * Get dataMode.
  */
 
-NAN_GETTER(Image::GetDataMode) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(img->data_mode));
+Napi::Value Image::GetDataMode(const Napi::CallbackInfo& info) {
+  return Napi::Number::New(info.Env(), this->data_mode);
 }
 
 /*
  * Set dataMode.
  */
 
-NAN_SETTER(Image::SetDataMode) {
-  if (value->IsNumber()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    int mode = value->Uint32Value();
-    img->data_mode = (data_mode_t) mode;
+void Image::SetDataMode(const Napi::CallbackInfo& info, const Napi::Value& value) {
+  if (value.Type() == napi_number) {
+    this->data_mode = (data_mode_t) value.As<Napi::Number>().Uint32Value();
   }
 }
 
@@ -112,26 +101,23 @@ NAN_SETTER(Image::SetDataMode) {
  * Get width.
  */
 
-NAN_GETTER(Image::GetWidth) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(img->width));
+Napi::Value Image::GetWidth(const Napi::CallbackInfo& info) {
+  return Napi::Number::New(info.Env(), this->width);
 }
 /*
  * Get height.
  */
 
-NAN_GETTER(Image::GetHeight) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<Number>(img->height));
+Napi::Value Image::GetHeight(const Napi::CallbackInfo& info) {
+  return Napi::Number::New(info.Env(), this->height);
 }
 
 /*
  * Get src path.
  */
 
-NAN_GETTER(Image::GetSource) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  info.GetReturnValue().Set(Nan::New<String>(img->filename ? img->filename : "").ToLocalChecked());
+Napi::Value Image::GetSource(const Napi::CallbackInfo& info) {
+  return Napi::String::New(info.Env(), this->filename ? this->filename : "");
 }
 
 /*
@@ -142,7 +128,7 @@ void
 Image::clearData() {
   if (_surface) {
     cairo_surface_destroy(_surface);
-    Nan::AdjustExternalMemory(-_data_len);
+    //Nan::AdjustExternalMemory(-_data_len); // TODO: napi_adjust_external_memory ??
     _data_len = 0;
     _surface = NULL;
   }
@@ -161,30 +147,29 @@ Image::clearData() {
  * Set src path.
  */
 
-NAN_SETTER(Image::SetSource) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
+void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) {
   cairo_status_t status = CAIRO_STATUS_READ_ERROR;
 
-  img->clearData();
+  this->clearData();
 
   // url string
-  if (value->IsString()) {
-    String::Utf8Value src(value);
-    if (img->filename) free(img->filename);
-    img->filename = strdup(*src);
-    status = img->load();
+  if (value.IsString()) {
+    if (this->filename) free(this->filename);
+    this->filename = strdup(value.As<Napi::String>().Utf8Value().c_str());
+    status = this->load();
   // Buffer
-  } else if (Buffer::HasInstance(value)) {
-    uint8_t *buf = (uint8_t *) Buffer::Data(value->ToObject());
-    unsigned len = Buffer::Length(value->ToObject());
-    status = img->loadFromBuffer(buf, len);
+  } else if (value.IsBuffer()) {
+    Napi::Buffer valueBuf = value.As<Napi::Buffer>();
+    uint8_t *buf = (uint8_t *)valueBuf.Data();
+    unsigned len = valueBuf.Length();
+    status = this->loadFromBuffer(buf, len);
   }
 
   // check status
   if (status) {
-    img->error(Canvas::Error(status));
+    this->error(Canvas::Error(info.Env(), status));
   } else {
-    img->loaded();
+    this->loaded(info.Env());
   }
 }
 
@@ -252,12 +237,11 @@ Image::readPNG(void *c, uint8_t *data, unsigned int len) {
  * Get onload callback.
  */
 
-NAN_GETTER(Image::GetOnload) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  if (img->onload) {
-    info.GetReturnValue().Set(img->onload->GetFunction());
+Napi::Value Image::GetOnload(const Napi::CallbackInfo& info) {
+  if (!this->onload.IsEmpty()) {
+    return this->onload.Value();
   } else {
-    info.GetReturnValue().SetNull();
+    return info.Env().Null();
   }
 }
 
@@ -265,16 +249,11 @@ NAN_GETTER(Image::GetOnload) {
  * Set onload callback.
  */
 
-NAN_SETTER(Image::SetOnload) {
-  if (value->IsFunction()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    img->onload = new Nan::Callback(value.As<Function>());
-  } else if (value->IsNull()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    if (img->onload) {
-      delete img->onload;
-    }
-    img->onload = NULL;
+void Image::SetOnload(const Napi::CallbackInfo& info, const Napi::Value& value) {
+  if (value.IsFunction()) {
+    this->onload.Reset(value.As<Napi::Function>(), 1);
+  } else if (value.IsNull()) {
+    this->onload.Reset();
   }
 }
 
@@ -282,12 +261,11 @@ NAN_SETTER(Image::SetOnload) {
  * Get onerror callback.
  */
 
-NAN_GETTER(Image::GetOnerror) {
-  Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-  if (img->onerror) {
-    info.GetReturnValue().Set(img->onerror->GetFunction());
+Napi::Value Image::GetOnerror(const Napi::CallbackInfo& info) {
+  if (!this->onerror.IsEmpty()) {
+    return this->onerror.Value();
   } else {
-    info.GetReturnValue().SetNull();
+    return info.Env().Null();
   }
 }
 
@@ -295,16 +273,11 @@ NAN_GETTER(Image::GetOnerror) {
  * Set onerror callback.
  */
 
-NAN_SETTER(Image::SetOnerror) {
-  if (value->IsFunction()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    img->onerror = new Nan::Callback(value.As<Function>());
-  } else if (value->IsNull()) {
-    Image *img = Nan::ObjectWrap::Unwrap<Image>(info.This());
-    if (img->onerror) {
-        delete img->onerror;
-    }
-    img->onerror = NULL;
+void Image::SetOnerror(const Napi::CallbackInfo& info, const Napi::Value& value) {
+  if (value.IsFunction()) {
+    this->onerror.Reset(value.As<Napi::Function>(), 1);
+  } else if (value.IsNull()) {
+    this->onerror.Reset();
   }
 }
 
@@ -319,8 +292,6 @@ Image::Image() {
   _surface = NULL;
   width = height = 0;
   state = DEFAULT;
-  onload = NULL;
-  onerror = NULL;
 }
 
 /*
@@ -329,16 +300,6 @@ Image::Image() {
 
 Image::~Image() {
   clearData();
-
-  if (onerror) {
-    delete onerror;
-    onerror = NULL;
-  }
-
-  if (onload) {
-    delete onload;
-    onload = NULL;
-  }
 }
 
 /*
@@ -359,17 +320,17 @@ Image::load() {
  */
 
 void
-Image::loaded() {
-  Nan::HandleScope scope;
+Image::loaded(Napi::Env env) {
+  Napi::HandleScope scope(env);
   state = COMPLETE;
 
   width = cairo_image_surface_get_width(_surface);
   height = cairo_image_surface_get_height(_surface);
   _data_len = height * cairo_image_surface_get_stride(_surface);
-  Nan::AdjustExternalMemory(_data_len);
+  // Nan::AdjustExternalMemory(_data_len); // TODO: napi_adjust_external_memory ??
 
-  if (onload != NULL) {
-    onload->Call(0, NULL);
+  if (!onload.IsEmpty()) {
+    onload.Value().MakeCallback({});
   }
 }
 
@@ -378,11 +339,10 @@ Image::loaded() {
  */
 
 void
-Image::error(Local<Value> err) {
-  Nan::HandleScope scope;
-  if (onerror != NULL) {
-    Local<Value> argv[1] = { err };
-    onerror->Call(1, argv);
+Image::error(Napi::Value err) {
+  Napi::HandleScope scope(err.Env());
+  if (!onerror.IsEmpty()) {
+    onerror.Value().MakeCallback({ err });
   }
 }
 
@@ -810,7 +770,7 @@ Image::decodeJPEGBufferIntoMimeSurface(uint8_t *buf, unsigned len) {
 
 void
 clearMimeData(void *closure) {
-  Nan::AdjustExternalMemory(-((read_closure_t *)closure)->len);
+  // Nan::AdjustExternalMemory(-((read_closure_t *)closure)->len); // TODO: napi_adjust_memory ??
   free(((read_closure_t *) closure)->buf);
   free(closure);
 }
@@ -837,7 +797,7 @@ Image::assignDataAsMime(uint8_t *data, int len, const char *mime_type) {
   mime_closure->buf = mime_data;
   mime_closure->len = len;
 
-  Nan::AdjustExternalMemory(len);
+  // Nan::AdjustExternalMemory(len); // TODO: napi_adjust_memory ??
 
   return cairo_surface_set_mime_data(_surface
     , mime_type

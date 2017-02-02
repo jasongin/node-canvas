@@ -62,6 +62,7 @@ class Canvas {
     canvas_type_t type;
     static napi_persistent constructor;
     static void Initialize(napi_env env, napi_value target);
+    static void Destroy(void* nativeObject);
     static NAPI_METHOD(New);
     static NAPI_METHOD(ToBuffer);
     static NAPI_GETTER(GetType);

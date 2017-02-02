@@ -99,7 +99,7 @@ NAPI_METHOD(Canvas::New) {
 
   napi_value wrapper = napi_get_cb_this(env, info);
   Canvas *canvas = new Canvas(width, height, type);
-  napi_wrap(env, wrapper, canvas, nullptr, nullptr); // TODO: Destructor?
+  napi_wrap(env, wrapper, canvas, Canvas::Destroy, nullptr);
   napi_set_return_value(env, info, wrapper);
 }
 
@@ -762,6 +762,10 @@ Canvas::Canvas(int w, int h, canvas_type_t t) {
     assert(_surface);
     // Nan::AdjustExternalMemory(nBytes()); // TODO: napi_adjust_memory ??
   }
+}
+
+void Canvas::Destroy(void* nativeObject) {
+  delete reinterpret_cast<Canvas*>(nativeObject);
 }
 
 /*

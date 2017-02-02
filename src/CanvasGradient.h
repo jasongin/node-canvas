@@ -14,6 +14,7 @@ class Gradient {
   public:
     static napi_persistent constructor;
     static void Initialize(napi_env env, napi_value target);
+    static void Destroy(void* nativeObject);
     static NAPI_METHOD(New);
     static NAPI_METHOD(AddColorStop);
     Gradient(double x0, double y0, double x1, double y1);

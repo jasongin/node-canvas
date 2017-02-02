@@ -14,6 +14,7 @@ class Pattern {
   public:
     static napi_persistent constructor;
     static void Initialize(napi_env env, napi_value target);
+    static void Destroy(void* nativeObject);
     static NAPI_METHOD(New);
     Pattern(cairo_surface_t *surface);
     inline cairo_pattern_t *pattern() { return _pattern; }

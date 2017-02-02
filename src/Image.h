@@ -35,6 +35,7 @@ class Image {
     Napi::Callback *onerror;
     static napi_persistent constructor;
     static void Initialize(napi_env env, napi_value target);
+    static void Destroy(void* nativeObject);
     static NAPI_METHOD(New);
     static NAPI_GETTER(GetSource);
     static NAPI_GETTER(GetOnload);

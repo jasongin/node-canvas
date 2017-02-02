@@ -76,7 +76,7 @@ NAPI_METHOD(Image::New) {
   napi_value wrapper = napi_get_cb_this(env, info);
   Image *img = new Image;
   img->data_mode = DATA_IMAGE;
-  napi_wrap(env, wrapper, img, nullptr, nullptr); // TODO: Destructor?
+  napi_wrap(env, wrapper, img, Image::Destroy, nullptr);
   napi_set_return_value(env, info, wrapper);
 }
 
@@ -357,6 +357,10 @@ Image::Image() {
   state = DEFAULT;
   onload = NULL;
   onerror = NULL;
+}
+
+void Image::Destroy(void* nativeObject) {
+  delete reinterpret_cast<Image*>(nativeObject);
 }
 
 /*

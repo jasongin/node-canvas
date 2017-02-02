@@ -51,7 +51,7 @@ NAPI_METHOD(Gradient::New) {
       napi_get_number_from_value(env, args[2]),
       napi_get_number_from_value(env, args[3]));
     napi_value wrapper = napi_get_cb_this(env, info);
-    napi_wrap(env, wrapper, grad, nullptr, nullptr); // TODO: Destructor?
+    napi_wrap(env, wrapper, grad, Gradient::Destroy, nullptr);
     napi_set_return_value(env, info, wrapper);
     return;
   }
@@ -66,7 +66,7 @@ NAPI_METHOD(Gradient::New) {
         napi_get_number_from_value(env, args[4]),
         napi_get_number_from_value(env, args[5]));
     napi_value wrapper = napi_get_cb_this(env, info);
-    napi_wrap(env, wrapper, grad, nullptr, nullptr); // TODO: Destructor?
+    napi_wrap(env, wrapper, grad, Gradient::Destroy, nullptr);
     napi_set_return_value(env, info, wrapper);
     return;
   }
@@ -126,6 +126,10 @@ Gradient::Gradient(double x0, double y0, double x1, double y1) {
 
 Gradient::Gradient(double x0, double y0, double r0, double x1, double y1, double r1) {
   _pattern = cairo_pattern_create_radial(x0, y0, r0, x1, y1, r1);
+}
+
+void Gradient::Destroy(void* nativeObject) {
+  delete reinterpret_cast<Gradient*>(nativeObject);
 }
 
 /*

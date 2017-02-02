@@ -58,6 +58,7 @@ class Context2d {
     Context2d(Canvas *canvas);
     static napi_persistent constructor;
     static void Initialize(napi_env env, napi_value target);
+    static void Destroy(void* nativeObject);
     static NAPI_METHOD(New);
     static NAPI_METHOD(DrawImage);
     static NAPI_METHOD(PutImageData);
@@ -130,7 +131,7 @@ class Context2d {
     static NAPI_SETTER(SetAntiAlias);
     static NAPI_SETTER(SetTextDrawingMode);
     static NAPI_SETTER(SetFilter);
-	inline void setContext(cairo_t *ctx) { _context = ctx; }
+    inline void setContext(cairo_t *ctx) { _context = ctx; }
     inline cairo_t *context(){ return _context; }
     inline Canvas *canvas(){ return _canvas; }
     inline bool hasShadow();

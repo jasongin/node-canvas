@@ -123,7 +123,7 @@ NAPI_METHOD(ImageData::New) {
   napi_value wrapper = napi_get_cb_this(env, info);
   ImageData *imageData = new ImageData(reinterpret_cast<uint8_t*>(dataPtr), width, height);
   napi_set_property(env, wrapper, napi_propertyname("data"), clampedArray);
-  napi_wrap(env, wrapper, imageData, nullptr, nullptr); // TODO: Destructor?
+  napi_wrap(env, wrapper, imageData, nullptr, nullptr);
   napi_set_return_value(env, info, wrapper);
 }
 

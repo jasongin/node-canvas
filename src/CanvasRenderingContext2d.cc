@@ -173,6 +173,10 @@ Context2d::Context2d(Canvas *canvas) {
   pango_layout_set_font_description(_layout, state->fontDescription);
 }
 
+void Context2d::Destroy(void* nativeObject) {
+  delete reinterpret_cast<Context2d*>(nativeObject);
+}
+
 /*
  * Destroy cairo context.
  */
@@ -510,7 +514,7 @@ NAPI_METHOD(Context2d::New) {
   Canvas* canvas = reinterpret_cast<Canvas*>(napi_unwrap(env, obj));
   napi_value wrapper = napi_get_cb_this(env, info);
   Context2d *context = new Context2d(canvas);
-  napi_wrap(env, wrapper, context, nullptr, nullptr); // TODO: Destructor?
+  napi_wrap(env, wrapper, context, Context2d::Destroy, nullptr);
   napi_set_return_value(env, info, wrapper);
 }
 

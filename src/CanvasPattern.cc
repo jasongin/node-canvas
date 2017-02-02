@@ -60,7 +60,7 @@ NAPI_METHOD(Pattern::New) {
 
   napi_value wrapper = napi_get_cb_this(env, info);
   Pattern *pattern = new Pattern(surface);
-  napi_wrap(env, wrapper, pattern, nullptr, nullptr); // TODO: Destructor?
+  napi_wrap(env, wrapper, pattern, Pattern::Destroy, nullptr);
   napi_set_return_value(env, info, wrapper);
 }
 
@@ -71,6 +71,10 @@ NAPI_METHOD(Pattern::New) {
 
 Pattern::Pattern(cairo_surface_t *surface) {
   _pattern = cairo_pattern_create_for_surface(surface);
+}
+
+void Pattern::Destroy(void* nativeObject) {
+  delete reinterpret_cast<Pattern*>(nativeObject);
 }
 
 /*

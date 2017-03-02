@@ -2,7 +2,8 @@
   'conditions': [
     ['OS=="win"', {
       'variables': {
-        'GTK_Root%': 'C:/GTK', # Set the location of GTK all-in-one bundle
+        'GTK_Root%': 'C:/Program Files/GTK', # Set the location of GTK all-in-one bundle
+        'jpeg_root': 'C:/Program Files/libjpeg',
         'with_jpeg%': 'false',
         'with_gif%': 'false'
       }

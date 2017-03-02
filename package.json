@@ -29,12 +29,12 @@
     "test-server": "node test/server.js"
   },
   "dependencies": {
-    "napi": "github:jasongin/abi-stable-node-wrapper#canvas"
-  },
-  "devDependencies": {
+    "napi": "github:jasongin/abi-stable-node-wrapper#canvas",
     "express": "^4.14.0",
     "mocha": "^3.1.2",
     "standard": "^8.5.0"
+  },
+  "devDependencies": {
   },
   "engines": {
     "node": ">=0.10.0"

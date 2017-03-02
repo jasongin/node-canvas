@@ -1634,6 +1634,7 @@ tests['drawImage(img,0,0)'] = function (ctx, done) {
   img.src = imageSrc('state.png')
 }
 
+/*
 tests['drawImage(img) jpeg'] = function (ctx, done) {
   var img = new Image()
   img.onload = function () {
@@ -1645,6 +1646,7 @@ tests['drawImage(img) jpeg'] = function (ctx, done) {
   }
   img.src = imageSrc('face.jpeg')
 }
+*/
 
 tests['drawImage(img,x,y)'] = function (ctx, done) {
   var img = new Image()

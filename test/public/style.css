@@ -37,3 +37,9 @@ table tr td:nth-child(3) {
 table tr td p {
   margin: 5px 0;
 }
+
+#node-version {
+  color: green;
+  font-size: 120%;
+  font-weight: bold;
+}

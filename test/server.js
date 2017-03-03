@@ -49,6 +49,10 @@ app.get('/pdf', function (req, res, next) {
   })
 })
 
+app.get('/node-version', function (req, res, next) {
+  res.send('node.js v' + process.versions.node)
+})
+
 app.listen(port, function () {
   console.log('👉  http://localhost:%d/', port)
 })

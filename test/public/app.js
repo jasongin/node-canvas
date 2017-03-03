@@ -32,6 +32,8 @@ function clearTests () {
 }
 
 function runTests () {
+  getNodeVersion();
+
   clearTests()
 
   var testNames = Object.keys(window.tests)
@@ -52,4 +54,16 @@ function runTests () {
   ])
 
   document.body.appendChild(table)
+}
+
+function getNodeVersion() {
+  var r = new XMLHttpRequest();
+  r.onreadystatechange = function () {
+    if (r.readyState === XMLHttpRequest.DONE && r.status === 200) {
+      var versionElement = document.getElementById('node-version');
+      versionElement.innerText = r.responseText;
+    }
+  };
+  r.open('GET', '/node-version');
+  r.send();
 }

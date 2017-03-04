@@ -22,7 +22,7 @@
 #define snprintf _snprintf
 #endif
 
-void init(Napi::Env env, Napi::Object exports, Napi::Object module) {
+void init(Node::Env env, Node::Object exports, Node::Object module) {
   Canvas::Initialize(env, exports);
   Image::Initialize(env, exports);
   ImageData::Initialize(env, exports);
@@ -76,4 +76,4 @@ void init(Napi::Env env, Napi::Object exports, Napi::Object module) {
   exports.Set("freetypeVersion", freetype_version);
 }
 
-NAPI_MODULE(canvas, init);
+NODE_MODULE(canvas, init);

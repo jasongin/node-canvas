@@ -12,13 +12,13 @@
 #include <stdlib.h>
 #include <v8.h>
 
-class ImageData: public Napi::ObjectWrap<ImageData> {
+class ImageData: public Node::ObjectWrap<ImageData> {
   public:
-    explicit ImageData(const Napi::CallbackInfo& info);
-    static Napi::Reference<Napi::Function> constructor;
-    static void Initialize(Napi::Env& env, Napi::Object& target);
-    Napi::Value GetWidth(const Napi::CallbackInfo& info);
-    Napi::Value GetHeight(const Napi::CallbackInfo& info);
+    explicit ImageData(const Node::CallbackInfo& info);
+    static Node::Reference<Node::Function> constructor;
+    static void Initialize(Node::Env& env, Node::Object& target);
+    Node::Value GetWidth(const Node::CallbackInfo& info);
+    Node::Value GetHeight(const Node::CallbackInfo& info);
 
     inline int width() { return _width; }
     inline int height() { return _height; }

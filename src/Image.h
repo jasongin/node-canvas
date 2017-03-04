@@ -27,27 +27,27 @@
 
 
 
-class Image : public Napi::ObjectWrap<Image> {
+class Image : public Node::ObjectWrap<Image> {
   public:
-    explicit Image(const Napi::CallbackInfo& info);
+    explicit Image(const Node::CallbackInfo& info);
     ~Image();
     char *filename;
     int width, height;
-    Napi::Reference<Napi::Function> onload;
-    Napi::Reference<Napi::Function> onerror;
-    static Napi::Reference<Napi::Function> constructor;
-    static void Initialize(Napi::Env& env, Napi::Object& target);
-    Napi::Value GetSource(const Napi::CallbackInfo& info);
-    Napi::Value GetOnload(const Napi::CallbackInfo& info);
-    Napi::Value GetOnerror(const Napi::CallbackInfo& info);
-    Napi::Value GetComplete(const Napi::CallbackInfo& info);
-    Napi::Value GetWidth(const Napi::CallbackInfo& info);
-    Napi::Value GetHeight(const Napi::CallbackInfo& info);
-    Napi::Value GetDataMode(const Napi::CallbackInfo& info);
-    void SetSource(const Napi::CallbackInfo& info, const Napi::Value& value);
-    void SetOnload(const Napi::CallbackInfo& info, const Napi::Value& value);
-    void SetOnerror(const Napi::CallbackInfo& info, const Napi::Value& value);
-    void SetDataMode(const Napi::CallbackInfo& info, const Napi::Value& value);
+    Node::Reference<Node::Function> onload;
+    Node::Reference<Node::Function> onerror;
+    static Node::Reference<Node::Function> constructor;
+    static void Initialize(Node::Env& env, Node::Object& target);
+    Node::Value GetSource(const Node::CallbackInfo& info);
+    Node::Value GetOnload(const Node::CallbackInfo& info);
+    Node::Value GetOnerror(const Node::CallbackInfo& info);
+    Node::Value GetComplete(const Node::CallbackInfo& info);
+    Node::Value GetWidth(const Node::CallbackInfo& info);
+    Node::Value GetHeight(const Node::CallbackInfo& info);
+    Node::Value GetDataMode(const Node::CallbackInfo& info);
+    void SetSource(const Node::CallbackInfo& info, const Node::Value& value);
+    void SetOnload(const Node::CallbackInfo& info, const Node::Value& value);
+    void SetOnerror(const Node::CallbackInfo& info, const Node::Value& value);
+    void SetDataMode(const Node::CallbackInfo& info, const Node::Value& value);
     inline cairo_surface_t *surface(){ return _surface; }
     inline uint8_t *data(){ return cairo_image_surface_get_data(_surface); }
     inline int stride(){ return cairo_image_surface_get_stride(_surface); }
@@ -74,8 +74,8 @@ class Image : public Napi::ObjectWrap<Image> {
     cairo_status_t assignDataAsMime(uint8_t *data, int len, const char *mime_type);
 #endif
 #endif
-    void error(Napi::Value error);
-    void loaded(Napi::Env env);
+    void error(Node::Value error);
+    void loaded(Node::Env env);
     cairo_status_t load();
     Image();
 

@@ -10,13 +10,13 @@
 
 #include "Canvas.h"
 
-class Gradient: public Napi::ObjectWrap<Gradient> {
+class Gradient: public Node::ObjectWrap<Gradient> {
   public:
-    explicit Gradient(const Napi::CallbackInfo& info);
+    explicit Gradient(const Node::CallbackInfo& info);
     ~Gradient();
-    static Napi::Reference<Napi::Function> constructor;
-    static void Initialize(Napi::Env& env, Napi::Object& target);
-    void AddColorStop(const Napi::CallbackInfo& info);
+    static Node::Reference<Node::Function> constructor;
+    static void Initialize(Node::Env& env, Node::Object& target);
+    void AddColorStop(const Node::CallbackInfo& info);
     Gradient(double x0, double y0, double x1, double y1);
     Gradient(double x0, double y0, double r0, double x1, double y1, double r1);
     inline cairo_pattern_t *pattern(){ return _pattern; }

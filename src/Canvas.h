@@ -8,7 +8,7 @@
 #ifndef __NODE_CANVAS_H__
 #define __NODE_CANVAS_H__
 
-#include <napi.h>
+#include <node-api.h>
 #include <uv.h>
 #include <node_version.h>
 #include <pango/pangocairo.h>
@@ -49,27 +49,27 @@ class FontFace {
  * Canvas.
  */
 
-class Canvas: public Napi::ObjectWrap<Canvas> {
+class Canvas: public Node::ObjectWrap<Canvas> {
   public:
-    Canvas(const Napi::CallbackInfo& info);
+    Canvas(const Node::CallbackInfo& info);
     ~Canvas();
     int width;
     int height;
     canvas_type_t type;
-    static Napi::Reference<Napi::Function> constructor;
-    static void Initialize(Napi::Env& env, Napi::Object& target);
-    Napi::Value ToBuffer(const Napi::CallbackInfo& info);
-    Napi::Value GetType(const Napi::CallbackInfo& info);
-    Napi::Value GetStride(const Napi::CallbackInfo& info);
-    Napi::Value GetWidth(const Napi::CallbackInfo& info);
-    Napi::Value GetHeight(const Napi::CallbackInfo& info);
-    void SetWidth(const Napi::CallbackInfo& info, const Napi::Value& value);
-    void SetHeight(const Napi::CallbackInfo& info, const Napi::Value& value);
-    void StreamPNGSync(const Napi::CallbackInfo& info);
-    void StreamPDFSync(const Napi::CallbackInfo& info);
-    void StreamJPEGSync(const Napi::CallbackInfo& info);
-    static void RegisterFont(const Napi::CallbackInfo& info);
-    static Napi::Value Error(Napi::Env env, cairo_status_t status);
+    static Node::Reference<Node::Function> constructor;
+    static void Initialize(Node::Env& env, Node::Object& target);
+    Node::Value ToBuffer(const Node::CallbackInfo& info);
+    Node::Value GetType(const Node::CallbackInfo& info);
+    Node::Value GetStride(const Node::CallbackInfo& info);
+    Node::Value GetWidth(const Node::CallbackInfo& info);
+    Node::Value GetHeight(const Node::CallbackInfo& info);
+    void SetWidth(const Node::CallbackInfo& info, const Node::Value& value);
+    void SetHeight(const Node::CallbackInfo& info, const Node::Value& value);
+    void StreamPNGSync(const Node::CallbackInfo& info);
+    void StreamPDFSync(const Node::CallbackInfo& info);
+    void StreamJPEGSync(const Node::CallbackInfo& info);
+    static void RegisterFont(const Node::CallbackInfo& info);
+    static Node::Value Error(Node::Env env, cairo_status_t status);
 #if NODE_VERSION_AT_LEAST(0, 6, 0)
     static void ToBufferAsync(uv_work_t *req);
     static void ToBufferAsyncAfter(uv_work_t *req);

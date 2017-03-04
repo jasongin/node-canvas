@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <node_buffer.h>
 
 #ifdef HAVE_GIF
 typedef struct {
@@ -28,17 +27,17 @@ typedef struct {
   uint8_t *buf;
 } read_closure_t;
 
-Napi::Reference<Napi::Function> Image::constructor;
+Node::Reference<Node::Function> Image::constructor;
 
 /*
  * Initialize Image.
  */
 
 void
-Image::Initialize(Napi::Env& env, Napi::Object& target) {
-  Napi::HandleScope scope(env);
+Image::Initialize(Node::Env& env, Node::Object& target) {
+  Node::HandleScope scope(env);
 
-  Napi::Function ctor = DefineClass(env, "Image", {
+  Node::Function ctor = DefineClass(env, "Image", {
     InstanceAccessor("source", &GetSource, &SetSource),
     InstanceAccessor("complete", &GetComplete, nullptr),
     InstanceAccessor("width", &GetWidth, nullptr),
@@ -49,12 +48,12 @@ Image::Initialize(Napi::Env& env, Napi::Object& target) {
     InstanceAccessor("dataMode", &GetDataMode, &SetDataMode),
 #endif
 #if CAIRO_VERSION_MINOR >= 10
-    StaticValue("MODE_IMAGE", Napi::Number::New(env, DATA_IMAGE)),
-    StaticValue("MODE_MIME", Napi::Number::New(env, DATA_MIME)),
+    StaticValue("MODE_IMAGE", Node::Number::New(env, DATA_IMAGE)),
+    StaticValue("MODE_MIME", Node::Number::New(env, DATA_MIME)),
 #endif
   });
 
-  constructor = Napi::Persistent(ctor);
+  constructor = Node::Persistent(ctor);
   constructor.SuppressDestruct();
   target.Set("Image", ctor);
 }
@@ -63,7 +62,7 @@ Image::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a new Image.
  */
 
-Image::Image(const Napi::CallbackInfo& info) : Image() {
+Image::Image(const Node::CallbackInfo& info) : Image() {
   this->data_mode = DATA_IMAGE;
 }
 
@@ -71,8 +70,8 @@ Image::Image(const Napi::CallbackInfo& info) : Image() {
  * Get complete boolean.
  */
 
-Napi::Value Image::GetComplete(const Napi::CallbackInfo& info) {
-  return Napi::Boolean::New(info.Env(), Image::COMPLETE == this->state);
+Node::Value Image::GetComplete(const Node::CallbackInfo& info) {
+  return Node::Boolean::New(info.Env(), Image::COMPLETE == this->state);
 }
 
 #if CAIRO_VERSION_MINOR >= 10
@@ -81,17 +80,17 @@ Napi::Value Image::GetComplete(const Napi::CallbackInfo& info) {
  * Get dataMode.
  */
 
-Napi::Value Image::GetDataMode(const Napi::CallbackInfo& info) {
-  return Napi::Number::New(info.Env(), this->data_mode);
+Node::Value Image::GetDataMode(const Node::CallbackInfo& info) {
+  return Node::Number::New(info.Env(), this->data_mode);
 }
 
 /*
  * Set dataMode.
  */
 
-void Image::SetDataMode(const Napi::CallbackInfo& info, const Napi::Value& value) {
+void Image::SetDataMode(const Node::CallbackInfo& info, const Node::Value& value) {
   if (value.Type() == napi_number) {
-    this->data_mode = (data_mode_t) value.As<Napi::Number>().Uint32Value();
+    this->data_mode = (data_mode_t) value.As<Node::Number>().Uint32Value();
   }
 }
 
@@ -101,23 +100,23 @@ void Image::SetDataMode(const Napi::CallbackInfo& info, const Napi::Value& value
  * Get width.
  */
 
-Napi::Value Image::GetWidth(const Napi::CallbackInfo& info) {
-  return Napi::Number::New(info.Env(), this->width);
+Node::Value Image::GetWidth(const Node::CallbackInfo& info) {
+  return Node::Number::New(info.Env(), this->width);
 }
 /*
  * Get height.
  */
 
-Napi::Value Image::GetHeight(const Napi::CallbackInfo& info) {
-  return Napi::Number::New(info.Env(), this->height);
+Node::Value Image::GetHeight(const Node::CallbackInfo& info) {
+  return Node::Number::New(info.Env(), this->height);
 }
 
 /*
  * Get src path.
  */
 
-Napi::Value Image::GetSource(const Napi::CallbackInfo& info) {
-  return Napi::String::New(info.Env(), this->filename ? this->filename : "");
+Node::Value Image::GetSource(const Node::CallbackInfo& info) {
+  return Node::String::New(info.Env(), this->filename ? this->filename : "");
 }
 
 /*
@@ -147,7 +146,7 @@ Image::clearData() {
  * Set src path.
  */
 
-void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) {
+void Image::SetSource(const Node::CallbackInfo& info, const Node::Value& value) {
   cairo_status_t status = CAIRO_STATUS_READ_ERROR;
 
   this->clearData();
@@ -155,11 +154,11 @@ void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) 
   // url string
   if (value.IsString()) {
     if (this->filename) free(this->filename);
-    this->filename = strdup(value.As<Napi::String>().Utf8Value().c_str());
+    this->filename = strdup(value.As<Node::String>().Utf8Value().c_str());
     status = this->load();
   // Buffer
   } else if (value.IsBuffer()) {
-    Napi::Buffer valueBuf = value.As<Napi::Buffer>();
+    Node::Buffer valueBuf = value.As<Node::Buffer>();
     uint8_t *buf = (uint8_t *)valueBuf.Data();
     unsigned len = valueBuf.Length();
     status = this->loadFromBuffer(buf, len);
@@ -237,7 +236,7 @@ Image::readPNG(void *c, uint8_t *data, unsigned int len) {
  * Get onload callback.
  */
 
-Napi::Value Image::GetOnload(const Napi::CallbackInfo& info) {
+Node::Value Image::GetOnload(const Node::CallbackInfo& info) {
   if (!this->onload.IsEmpty()) {
     return this->onload.Value();
   } else {
@@ -249,9 +248,9 @@ Napi::Value Image::GetOnload(const Napi::CallbackInfo& info) {
  * Set onload callback.
  */
 
-void Image::SetOnload(const Napi::CallbackInfo& info, const Napi::Value& value) {
+void Image::SetOnload(const Node::CallbackInfo& info, const Node::Value& value) {
   if (value.IsFunction()) {
-    this->onload.Reset(value.As<Napi::Function>(), 1);
+    this->onload.Reset(value.As<Node::Function>(), 1);
   } else if (value.IsNull()) {
     this->onload.Reset();
   }
@@ -261,7 +260,7 @@ void Image::SetOnload(const Napi::CallbackInfo& info, const Napi::Value& value) 
  * Get onerror callback.
  */
 
-Napi::Value Image::GetOnerror(const Napi::CallbackInfo& info) {
+Node::Value Image::GetOnerror(const Node::CallbackInfo& info) {
   if (!this->onerror.IsEmpty()) {
     return this->onerror.Value();
   } else {
@@ -273,9 +272,9 @@ Napi::Value Image::GetOnerror(const Napi::CallbackInfo& info) {
  * Set onerror callback.
  */
 
-void Image::SetOnerror(const Napi::CallbackInfo& info, const Napi::Value& value) {
+void Image::SetOnerror(const Node::CallbackInfo& info, const Node::Value& value) {
   if (value.IsFunction()) {
-    this->onerror.Reset(value.As<Napi::Function>(), 1);
+    this->onerror.Reset(value.As<Node::Function>(), 1);
   } else if (value.IsNull()) {
     this->onerror.Reset();
   }
@@ -320,8 +319,8 @@ Image::load() {
  */
 
 void
-Image::loaded(Napi::Env env) {
-  Napi::HandleScope scope(env);
+Image::loaded(Node::Env env) {
+  Node::HandleScope scope(env);
   state = COMPLETE;
 
   width = cairo_image_surface_get_width(_surface);
@@ -339,8 +338,8 @@ Image::loaded(Napi::Env env) {
  */
 
 void
-Image::error(Napi::Value err) {
-  Napi::HandleScope scope(err.Env());
+Image::error(Node::Value err) {
+  Node::HandleScope scope(err.Env());
   if (!onerror.IsEmpty()) {
     onerror.Value().MakeCallback({ err });
   }

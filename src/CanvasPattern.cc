@@ -9,18 +9,18 @@
 #include "Image.h"
 #include "CanvasPattern.h"
 
-Napi::Reference<Napi::Function> Pattern::constructor;
+Node::Reference<Node::Function> Pattern::constructor;
 
 /*
  * Initialize CanvasPattern.
  */
 
 void
-Pattern::Initialize(Napi::Env& env, Napi::Object& target) {
-  Napi::HandleScope scope(env);
+Pattern::Initialize(Node::Env& env, Node::Object& target) {
+  Node::HandleScope scope(env);
 
-  Napi::Function ctor = DefineClass(env, "CanvasPattern", {});
-  constructor = Napi::Persistent(ctor);
+  Node::Function ctor = DefineClass(env, "CanvasPattern", {});
+  constructor = Node::Persistent(ctor);
   constructor.SuppressDestruct();
   target.Set("CanvasPattern", ctor);
 }
@@ -29,26 +29,26 @@ Pattern::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a new CanvasPattern.
  */
 
-Pattern::Pattern(const Napi::CallbackInfo& info) {
+Pattern::Pattern(const Node::CallbackInfo& info) {
   cairo_surface_t *surface;
 
-  Napi::Object obj = info[0].As<Napi::Object>();
+  Node::Object obj = info[0].As<Node::Object>();
 
-  if (obj.InstanceOf(Image::constructor.Value().As<Napi::Function>())) {
+  if (obj.InstanceOf(Image::constructor.Value().As<Node::Function>())) {
     Image *img = Image::Unwrap(obj);
     if (!img->isComplete()) {
-      throw Napi::Error::New(info.Env(), "Image given has not completed loading");
+      throw Node::Error::New(info.Env(), "Image given has not completed loading");
     }
     surface = img->surface();
 
   // Canvas
-  } else if (obj.InstanceOf(Canvas::constructor.Value().As<Napi::Function>())) {
+  } else if (obj.InstanceOf(Canvas::constructor.Value().As<Node::Function>())) {
     Canvas *canvas = Canvas::Unwrap(obj);
     surface = canvas->surface();
 
   // Invalid
   } else {
-    throw Napi::TypeError::New(info.Env(), "Image or Canvas expected");
+    throw Node::TypeError::New(info.Env(), "Image or Canvas expected");
   }
 
   _pattern = cairo_pattern_create_for_surface(surface);

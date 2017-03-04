@@ -9,21 +9,21 @@
 #include "Canvas.h"
 #include "CanvasGradient.h"
 
-Napi::Reference<Napi::Function> Gradient::constructor;
+Node::Reference<Node::Function> Gradient::constructor;
 
 /*
  * Initialize CanvasGradient.
  */
 
 void
-Gradient::Initialize(Napi::Env& env, Napi::Object& target) {
-  Napi::HandleScope scope(env);
+Gradient::Initialize(Node::Env& env, Node::Object& target) {
+  Node::HandleScope scope(env);
 
-  Napi::Function ctor = DefineClass(env, "CanvasGradient", {
+  Node::Function ctor = DefineClass(env, "CanvasGradient", {
     InstanceMethod("addColorStop", &AddColorStop),
   });
 
-  constructor = Napi::Persistent(ctor);
+  constructor = Node::Persistent(ctor);
   constructor.SuppressDestruct();
   target.Set("CanvasGradient", ctor);
 }
@@ -32,27 +32,27 @@ Gradient::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a new CanvasGradient.
  */
 
-Gradient::Gradient(const Napi::CallbackInfo& info) {
+Gradient::Gradient(const Node::CallbackInfo& info) {
   // Linear
   if (4 == info.Length()) {
     _pattern = cairo_pattern_create_linear(
-        info[0].As<Napi::Number>()
-      , info[1].As<Napi::Number>()
-      , info[2].As<Napi::Number>()
-      , info[3].As<Napi::Number>());
+        info[0].As<Node::Number>()
+      , info[1].As<Node::Number>()
+      , info[2].As<Node::Number>()
+      , info[3].As<Node::Number>());
   }
   // Radial
   else if (6 == info.Length()) {
     _pattern = cairo_pattern_create_radial(
-        info[0].As<Napi::Number>()
-      , info[1].As<Napi::Number>()
-      , info[2].As<Napi::Number>()
-      , info[3].As<Napi::Number>()
-      , info[4].As<Napi::Number>()
-      , info[5].As<Napi::Number>());
+        info[0].As<Node::Number>()
+      , info[1].As<Node::Number>()
+      , info[2].As<Node::Number>()
+      , info[3].As<Node::Number>()
+      , info[4].As<Node::Number>()
+      , info[5].As<Node::Number>());
   }
   else {
-    throw Napi::TypeError::New(info.Env(), "invalid arguments");
+    throw Node::TypeError::New(info.Env(), "invalid arguments");
   }
 }
 
@@ -60,26 +60,26 @@ Gradient::Gradient(const Napi::CallbackInfo& info) {
  * Add color stop.
  */
 
-void Gradient::AddColorStop(const Napi::CallbackInfo& info) {
+void Gradient::AddColorStop(const Node::CallbackInfo& info) {
   if (napi_number != info[0].Type())
-    throw Napi::TypeError::New(info.Env(),"offset required");
+    throw Node::TypeError::New(info.Env(),"offset required");
   if (napi_string != info[1].Type())
-    throw Napi::TypeError::New(info.Env(),"color string required");
+    throw Node::TypeError::New(info.Env(),"color string required");
 
   short ok;
-  uint32_t rgba = rgba_from_string(info[1].As<Napi::String>().Utf8Value().c_str(), &ok);
+  uint32_t rgba = rgba_from_string(info[1].As<Node::String>().Utf8Value().c_str(), &ok);
 
   if (ok) {
     rgba_t color = rgba_create(rgba);
     cairo_pattern_add_color_stop_rgba(
         this->pattern()
-      , info[0].As<Napi::Number>()
+      , info[0].As<Node::Number>()
       , color.r
       , color.g
       , color.b
       , color.a);
   } else {
-    throw Napi::TypeError::New(info.Env(),"parse color failed");
+    throw Node::TypeError::New(info.Env(),"parse color failed");
   }
 }
 

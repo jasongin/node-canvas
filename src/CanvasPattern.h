@@ -10,12 +10,12 @@
 
 #include "Canvas.h"
 
-class Pattern: public Napi::ObjectWrap<Pattern> {
+class Pattern: public Node::ObjectWrap<Pattern> {
   public:
-    explicit Pattern(const Napi::CallbackInfo& info);
+    explicit Pattern(const Node::CallbackInfo& info);
     ~Pattern();
-    static Napi::Reference<Napi::Function> constructor;
-    static void Initialize(Napi::Env& env, Napi::Object& target);
+    static Node::Reference<Node::Function> constructor;
+    static void Initialize(Node::Env& env, Node::Object& target);
     Pattern(cairo_surface_t *surface);
     inline cairo_pattern_t *pattern() { return _pattern; }
 

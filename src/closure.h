@@ -21,8 +21,8 @@
  */
 
 typedef struct closure_t {
-  Napi::Reference<Napi::Function>* pfn;
-  Napi::Function fn;
+  Node::Reference<Node::Function>* pfn;
+  Node::Function fn;
   unsigned len;
   unsigned max_len;
   uint8_t *data;

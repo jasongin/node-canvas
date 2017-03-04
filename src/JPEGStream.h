@@ -30,10 +30,10 @@ init_closure_destination(j_compress_ptr cinfo){
 boolean
 empty_closure_output_buffer(j_compress_ptr cinfo){
   closure_destination_mgr *dest = (closure_destination_mgr *)cinfo->dest;
-  Napi::Env env = dest->closure->canvas->Env();
-  Napi::HandleScope scope(env);
+  Node::Env env = dest->closure->canvas->Env();
+  Node::HandleScope scope(env);
 
-  Napi::Value buf = Napi::Buffer::New(env, (char *)dest->buffer, dest->bufsize, nullptr);
+  Node::Value buf = Node::Buffer::New(env, (char *)dest->buffer, dest->bufsize, nullptr);
 
   // emit "data"
   dest->closure->fn.MakeCallback({
@@ -50,11 +50,11 @@ empty_closure_output_buffer(j_compress_ptr cinfo){
 void
 term_closure_destination(j_compress_ptr cinfo){
   closure_destination_mgr *dest = (closure_destination_mgr *)cinfo->dest;
-  Napi::Env env = dest->closure->canvas->Env();
-  Napi::HandleScope scope(env);
+  Node::Env env = dest->closure->canvas->Env();
+  Node::HandleScope scope(env);
 
   /* emit remaining data */
-  Napi::Value buf = Napi::Buffer::New(env, (char *)dest->buffer, dest->bufsize - dest->pub.free_in_buffer, nullptr);
+  Node::Value buf = Node::Buffer::New(env, (char *)dest->buffer, dest->bufsize - dest->pub.free_in_buffer, nullptr);
 
   dest->closure->fn.MakeCallback({
     env.Null(),

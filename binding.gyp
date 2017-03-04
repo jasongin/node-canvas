@@ -47,7 +47,8 @@
     },
     {
       'target_name': 'canvas',
-      'include_dirs': ["<!(node -e \"require('napi')\")"],
+      'include_dirs': ["<!(node -e \"require('abi-stable-node/include')\")"],
+      'libraries': ["<!(node -e \"require('abi-stable-node/lib')\")"],
       'sources': [
         'src/Canvas.cc',
         'src/CanvasGradient.cc',

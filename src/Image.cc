@@ -159,8 +159,8 @@ void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) 
     status = this->load();
   // Buffer
   } else if (value.IsBuffer()) {
-    Napi::Buffer valueBuf = value.As<Napi::Buffer>();
-    uint8_t *buf = (uint8_t *)valueBuf.Data();
+    Napi::Buffer<uint8_t> valueBuf = value.As<Napi::Buffer<uint8_t>>();
+    uint8_t *buf = valueBuf.Data();
     unsigned len = valueBuf.Length();
     status = this->loadFromBuffer(buf, len);
   }

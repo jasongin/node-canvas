@@ -217,7 +217,8 @@ Canvas::EIO_AfterToBuffer(eio_req *req) {
   if (closure->status) {
     closure->pfn->Value().MakeCallback({ Canvas::Error(env, closure->status) });
   } else {
-    Napi::Buffer buf = Napi::Buffer::Copy(env, (char*)closure->data, closure->len);
+    Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::Copy(
+      env, closure->data, closure->len);
     closure->pfn->Value().MakeCallback({ env.Null(), buf });
   }
 
@@ -246,7 +247,8 @@ Napi::Value Canvas::ToBuffer(const Napi::CallbackInfo& info) {
     cairo_surface_finish(this->surface());
     closure_t *closure = (closure_t *) this->closure();
 
-    Napi::Buffer buf = Napi::Buffer::Copy(info.Env(), (char*)closure->data, closure->len);
+    Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::Copy(
+      info.Env(), closure->data, closure->len);
     return buf;
   }
 
@@ -254,8 +256,8 @@ Napi::Value Canvas::ToBuffer(const Napi::CallbackInfo& info) {
     // Return raw ARGB data -- just a memcpy()
     cairo_surface_t *surface = this->surface();
     cairo_surface_flush(surface);
-    const unsigned char *data = cairo_image_surface_get_data(surface);
-    Napi::Value buf = Napi::Buffer::Copy(info.Env(), reinterpret_cast<const char*>(data), this->nBytes());
+    const uint8_t *data = cairo_image_surface_get_data(surface);
+    Napi::Value buf = Napi::Buffer<uint8_t>::Copy(info.Env(), data, this->nBytes());
     return buf;
   }
 
@@ -349,7 +351,8 @@ Napi::Value Canvas::ToBuffer(const Napi::CallbackInfo& info) {
       closure_destroy(&closure);
       throw Canvas::Error(info.Env(), status);
     } else {
-      Napi::Buffer buf = Napi::Buffer::Copy(info.Env(), (char*)closure.data, closure.len);
+      Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::Copy(
+        info.Env(), closure.data, closure.len);
       closure_destroy(&closure);
       return buf;
     }
@@ -365,7 +368,7 @@ streamPNG(void *c, const uint8_t *data, unsigned len) {
   closure_t *closure = (closure_t *) c;
   Napi::Env env = closure->canvas->Env();
   Napi::HandleScope scope(env);
-  Napi::Buffer buf = Napi::Buffer::Copy(env, (char*)data, len);
+  Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::Copy(env, data, len);
   closure->fn.MakeCallback({
     env.Null(),
     buf,
@@ -455,7 +458,8 @@ streamPDF(void *c, const uint8_t *data, unsigned len) {
   closure_t *closure = static_cast<closure_t *>(c);
   Napi::Env env = closure->canvas->Env();
   Napi::HandleScope scope(env);
-  Napi::Buffer buf = Napi::Buffer::New(env, const_cast<char *>(reinterpret_cast<const char *>(data)), len, nullptr);
+  Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::New(
+    env, const_cast<uint8_t*>(data), len, nullptr);
   closure->fn.MakeCallback({
     env.Null(),
     buf,

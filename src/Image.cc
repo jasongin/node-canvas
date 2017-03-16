@@ -28,7 +28,7 @@ typedef struct {
   uint8_t *buf;
 } read_closure_t;
 
-Napi::Reference<Napi::Function> Image::constructor;
+Napi::FunctionReference Image::constructor;
 
 /*
  * Initialize Image.
@@ -330,7 +330,7 @@ Image::loaded(Napi::Env env) {
   // Nan::AdjustExternalMemory(_data_len); // TODO: napi_adjust_external_memory ??
 
   if (!onload.IsEmpty()) {
-    onload.Value().MakeCallback({});
+    onload.MakeCallback(env.Global(), env.Global());
   }
 }
 
@@ -342,7 +342,7 @@ void
 Image::error(Napi::Value err) {
   Napi::HandleScope scope(err.Env());
   if (!onerror.IsEmpty()) {
-    onerror.Value().MakeCallback({ err });
+    onerror.MakeCallback(err.Env().Global(), err);
   }
 }
 

@@ -15,7 +15,7 @@
 class ImageData: public Napi::ObjectWrap<ImageData> {
   public:
     explicit ImageData(const Napi::CallbackInfo& info);
-    static Napi::Reference<Napi::Function> constructor;
+    static Napi::FunctionReference constructor;
     static void Initialize(Napi::Env& env, Napi::Object& target);
     Napi::Value GetWidth(const Napi::CallbackInfo& info);
     Napi::Value GetHeight(const Napi::CallbackInfo& info);

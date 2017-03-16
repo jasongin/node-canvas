@@ -725,8 +725,8 @@ Napi::Value Context2d::GetImageData(const Napi::CallbackInfo& info) {
   Napi::Value swHandle = Napi::Number::New(info.Env(), sw);
   Napi::Value shHandle = Napi::Number::New(info.Env(), sh);
 
-  Napi::Value instance = ImageData::constructor.Value().As<Napi::Function>().New(
-    { clampedArray, swHandle, shHandle });
+  Napi::Value instance = ImageData::constructor.New(
+    clampedArray, swHandle, shHandle);
   return instance;
 }
 

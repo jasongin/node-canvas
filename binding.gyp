@@ -47,7 +47,7 @@
     },
     {
       'target_name': 'canvas',
-      'include_dirs': ["<!(node -e \"require('napi')\")"],
+      'include_dirs': ["<!(node -p \"require('napi').include\")"],
       'sources': [
         'src/Canvas.cc',
         'src/CanvasGradient.cc',

@@ -14,7 +14,7 @@ class Gradient: public Napi::ObjectWrap<Gradient> {
   public:
     explicit Gradient(const Napi::CallbackInfo& info);
     ~Gradient();
-    static Napi::Reference<Napi::Function> constructor;
+    static Napi::FunctionReference constructor;
     static void Initialize(Napi::Env& env, Napi::Object& target);
     void AddColorStop(const Napi::CallbackInfo& info);
     Gradient(double x0, double y0, double x1, double y1);

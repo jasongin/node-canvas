@@ -56,7 +56,7 @@ class Canvas: public Napi::ObjectWrap<Canvas> {
     int width;
     int height;
     canvas_type_t type;
-    static Napi::Reference<Napi::Function> constructor;
+    static Napi::FunctionReference constructor;
     static void Initialize(Napi::Env& env, Napi::Object& target);
     Napi::Value ToBuffer(const Napi::CallbackInfo& info);
     Napi::Value GetType(const Napi::CallbackInfo& info);

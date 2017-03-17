@@ -32,7 +32,7 @@ function clearTests () {
 }
 
 function runTests () {
-  getNodeVersion();
+  getNodeVersion()
 
   clearTests()
 
@@ -56,14 +56,14 @@ function runTests () {
   document.body.appendChild(table)
 }
 
-function getNodeVersion() {
-  var r = new XMLHttpRequest();
+function getNodeVersion () {
+  var r = new window.XMLHttpRequest()
   r.onreadystatechange = function () {
-    if (r.readyState === XMLHttpRequest.DONE && r.status === 200) {
-      var versionElement = document.getElementById('node-version');
-      versionElement.innerText = r.responseText;
+    if (r.readyState === window.XMLHttpRequest.DONE && r.status === 200) {
+      var versionElement = document.getElementById('node-version')
+      versionElement.innerText = r.responseText
     }
-  };
-  r.open('GET', '/node-version');
-  r.send();
+  }
+  r.open('GET', '/node-version')
+  r.send()
 }

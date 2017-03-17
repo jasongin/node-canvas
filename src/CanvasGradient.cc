@@ -9,7 +9,7 @@
 #include "Canvas.h"
 #include "CanvasGradient.h"
 
-Napi::Reference<Napi::Function> Gradient::constructor;
+Napi::FunctionReference Gradient::constructor;
 
 /*
  * Initialize CanvasGradient.

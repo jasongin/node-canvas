@@ -14,7 +14,7 @@ class Pattern: public Napi::ObjectWrap<Pattern> {
   public:
     explicit Pattern(const Napi::CallbackInfo& info);
     ~Pattern();
-    static Napi::Reference<Napi::Function> constructor;
+    static Napi::FunctionReference constructor;
     static void Initialize(Napi::Env& env, Napi::Object& target);
     Pattern(cairo_surface_t *surface);
     inline cairo_pattern_t *pattern() { return _pattern; }

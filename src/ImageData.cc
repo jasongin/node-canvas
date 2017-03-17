@@ -7,7 +7,7 @@
 
 #include "ImageData.h"
 
-Napi::Reference<Napi::Function> ImageData::constructor;
+Napi::FunctionReference ImageData::constructor;
 
 /*
  * Initialize ImageData.

@@ -21,7 +21,7 @@
  */
 
 typedef struct closure_t {
-  Napi::Reference<Napi::Function>* pfn;
+  Napi::FunctionReference* pfn;
   Napi::Function fn;
   unsigned len;
   unsigned max_len;

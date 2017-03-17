@@ -30,7 +30,7 @@
 #define isinf(x) std::isinf(x)
 #endif
 
-Napi::Reference<Napi::Function> Context2d::constructor;
+Napi::FunctionReference Context2d::constructor;
 
 /*
  * Rectangle arg assertions.
@@ -725,8 +725,8 @@ Napi::Value Context2d::GetImageData(const Napi::CallbackInfo& info) {
   Napi::Value swHandle = Napi::Number::New(info.Env(), sw);
   Napi::Value shHandle = Napi::Number::New(info.Env(), sh);
 
-  Napi::Value instance = ImageData::constructor.Value().As<Napi::Function>().New(
-    { clampedArray, swHandle, shHandle });
+  Napi::Object instance = ImageData::constructor.New({
+    clampedArray, swHandle, shHandle});
   return instance;
 }
 
@@ -1876,12 +1876,12 @@ void Context2d::SetLineDash(const Napi::CallbackInfo& info) {
  */
 Napi::Value Context2d::GetLineDash(const Napi::CallbackInfo& info) {
   cairo_t *ctx = this->context();
-  int dashes = cairo_get_dash_count(ctx);
+  uint32_t dashes = cairo_get_dash_count(ctx);
   std::vector<double> a(dashes);
   cairo_get_dash(ctx, a.data(), NULL);
 
   Napi::Array dash = Napi::Array::New(info.Env(), dashes);
-  for (int i=0; i<dashes; i++)
+  for (uint32_t i=0; i<dashes; i++)
     dash.Set(i, Napi::Number::New(info.Env(), a[i]));
 
   return dash;

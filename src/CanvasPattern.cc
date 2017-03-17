@@ -9,7 +9,7 @@
 #include "Image.h"
 #include "CanvasPattern.h"
 
-Napi::Reference<Napi::Function> Pattern::constructor;
+Napi::FunctionReference Pattern::constructor;
 
 /*
  * Initialize CanvasPattern.

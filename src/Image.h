@@ -33,9 +33,9 @@ class Image : public Napi::ObjectWrap<Image> {
     ~Image();
     char *filename;
     int width, height;
-    Napi::Reference<Napi::Function> onload;
-    Napi::Reference<Napi::Function> onerror;
-    static Napi::Reference<Napi::Function> constructor;
+    Napi::FunctionReference onload;
+    Napi::FunctionReference onerror;
+    static Napi::FunctionReference constructor;
     static void Initialize(Napi::Env& env, Napi::Object& target);
     Napi::Value GetSource(const Napi::CallbackInfo& info);
     Napi::Value GetOnload(const Napi::CallbackInfo& info);

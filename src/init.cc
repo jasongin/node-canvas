@@ -76,4 +76,4 @@ void init(Napi::Env env, Napi::Object exports, Napi::Object module) {
   exports.Set("freetypeVersion", freetype_version);
 }
 
-NAPI_MODULE(canvas, init);
+NODE_API_MODULE(canvas, init);

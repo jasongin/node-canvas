@@ -59,7 +59,7 @@ class Context2d: public Napi::ObjectWrap<Context2d> {
     canvas_state_t *state;
     Context2d(Canvas *canvas);
     void init(Canvas *canvas);
-    static Napi::Reference<Napi::Function> constructor;
+    static Napi::FunctionReference constructor;
     static void Initialize(Napi::Env& env, Napi::Object& target);
     void DrawImage(const Napi::CallbackInfo& info);
     void PutImageData(const Napi::CallbackInfo& info);

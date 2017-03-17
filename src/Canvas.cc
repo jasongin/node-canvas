@@ -26,7 +26,7 @@
   "with at least a family (string) and optionally weight (string/number) " \
   "and style (string)."
 
-Napi::Reference<Napi::Function> Canvas::constructor;
+Napi::FunctionReference Canvas::constructor;
 
 /*
  * Initialize Canvas.
@@ -215,11 +215,11 @@ Canvas::EIO_AfterToBuffer(eio_req *req) {
 #endif
 
   if (closure->status) {
-    closure->pfn->Value().MakeCallback({ Canvas::Error(env, closure->status) });
+    closure->pfn->MakeCallback({ Canvas::Error(env, closure->status) });
   } else {
     Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::Copy(
       env, closure->data, closure->len);
-    closure->pfn->Value().MakeCallback({ env.Null(), buf });
+    closure->pfn->MakeCallback({ env.Null(), buf });
   }
 
   closure->canvas->Release();
@@ -315,7 +315,7 @@ Napi::Value Canvas::ToBuffer(const Napi::CallbackInfo& info) {
 
     // TODO: only one callback fn in closure
     this->AddRef();
-    closure->pfn = new Napi::Reference<Napi::Function>();
+    closure->pfn = new Napi::FunctionReference();
     closure->pfn->Reset(info[0].As<Napi::Function>(), 1);
 
 #if NODE_VERSION_AT_LEAST(0, 6, 0)

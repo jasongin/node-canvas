@@ -20,7 +20,7 @@ Gradient::Initialize(Napi::Env& env, Napi::Object& target) {
   Napi::HandleScope scope(env);
 
   Napi::Function ctor = DefineClass(env, "CanvasGradient", {
-    InstanceMethod("addColorStop", &AddColorStop),
+    InstanceMethod("addColorStop", &Gradient::AddColorStop),
   });
 
   constructor = Napi::Persistent(ctor);

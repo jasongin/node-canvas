@@ -63,11 +63,9 @@ void init(Napi::Env env, Napi::Object exports, Napi::Object module) {
 #ifndef GIF_LIB_VERSION
   char gif_version[10];
   snprintf(gif_version, 10, "%d.%d.%d", GIFLIB_MAJOR, GIFLIB_MINOR, GIFLIB_RELEASE);
-  version = napi_create_string(env, gif_version);
-  napi_set_property(env, exports, napi_property_name(env, "gifVersion"), version);
+  exports.Set("gifVersion", gif_version);
 #else
-  version = napi_create_string(env, GIF_LIB_VERSION);
-  napi_set_property(env, exports, napi_property_name(env, "gifVersion"), version);
+  exports.Set("gifVersion", GIF_LIB_VERSION);
 #endif
 #endif
 

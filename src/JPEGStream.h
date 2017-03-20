@@ -33,7 +33,8 @@ empty_closure_output_buffer(j_compress_ptr cinfo){
   Napi::Env env = dest->closure->canvas->Env();
   Napi::HandleScope scope(env);
 
-  Napi::Value buf = Napi::Buffer::New(env, (char *)dest->buffer, dest->bufsize, nullptr);
+  Napi::Buffer<JOCTET> buf = Napi::Buffer<JOCTET>::New(
+    env, dest->buffer, dest->bufsize, nullptr);
 
   // emit "data"
   dest->closure->fn.MakeCallback({
@@ -54,7 +55,8 @@ term_closure_destination(j_compress_ptr cinfo){
   Napi::HandleScope scope(env);
 
   /* emit remaining data */
-  Napi::Value buf = Napi::Buffer::New(env, (char *)dest->buffer, dest->bufsize - dest->pub.free_in_buffer, nullptr);
+  Napi::Buffer<JOCTET> buf = Napi::Buffer<JOCTET>::New(
+    env, dest->buffer, dest->bufsize - dest->pub.free_in_buffer, nullptr);
 
   dest->closure->fn.MakeCallback({
     env.Null(),

@@ -18,8 +18,8 @@ ImageData::Initialize(Napi::Env& env, Napi::Object& target) {
   Napi::HandleScope scope(env);
 
   Napi::Function ctor = DefineClass(env, "ImageData", {
-    InstanceAccessor("width", &GetWidth, nullptr),
-    InstanceAccessor("height", &GetHeight, nullptr),
+    InstanceAccessor("width", &ImageData::GetWidth, nullptr),
+    InstanceAccessor("height", &ImageData::GetHeight, nullptr),
   });
 
   constructor = Napi::Persistent(ctor);

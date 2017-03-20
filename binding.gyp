@@ -49,6 +49,9 @@
       'target_name': 'canvas',
       'include_dirs': ["<!(node -p \"require('node-api').include\")"],
       'dependencies': ["<!(node -p \"require('node-api').gyp\")"],
+      'cflags!': [ '-fno-exceptions' ],
+      'cflags_cc!': [ '-fno-exceptions' ],
+      'xcode_settings': { 'GCC_ENABLE_CPP_EXCEPTIONS': 'YES' },
       'sources': [
         'src/Canvas.cc',
         'src/CanvasGradient.cc',

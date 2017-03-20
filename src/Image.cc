@@ -39,14 +39,14 @@ Image::Initialize(Napi::Env& env, Napi::Object& target) {
   Napi::HandleScope scope(env);
 
   Napi::Function ctor = DefineClass(env, "Image", {
-    InstanceAccessor("source", &GetSource, &SetSource),
-    InstanceAccessor("complete", &GetComplete, nullptr),
-    InstanceAccessor("width", &GetWidth, nullptr),
-    InstanceAccessor("height", &GetHeight, nullptr),
-    InstanceAccessor("onload", &GetOnload, &SetOnload),
-    InstanceAccessor("onerror", &GetOnerror, &SetOnerror),
+    InstanceAccessor("source", &Image::GetSource, &Image::SetSource),
+    InstanceAccessor("complete", &Image::GetComplete, nullptr),
+    InstanceAccessor("width", &Image::GetWidth, nullptr),
+    InstanceAccessor("height", &Image::GetHeight, nullptr),
+    InstanceAccessor("onload", &Image::GetOnload, &Image::SetOnload),
+    InstanceAccessor("onerror", &Image::GetOnerror, &Image::SetOnerror),
 #if CAIRO_VERSION_MINOR >= 10
-    InstanceAccessor("dataMode", &GetDataMode, &SetDataMode),
+    InstanceAccessor("dataMode", &Image::GetDataMode, &Image::SetDataMode),
 #endif
 #if CAIRO_VERSION_MINOR >= 10
     StaticValue("MODE_IMAGE", Napi::Number::New(env, DATA_IMAGE)),

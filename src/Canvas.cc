@@ -37,16 +37,16 @@ Canvas::Initialize(Napi::Env& env, Napi::Object& target) {
   Napi::HandleScope scope(env);
 
   Napi::Function ctor = DefineClass(env, "Canvas", {
-    InstanceMethod("toBuffer", &ToBuffer),
-    InstanceMethod("streamPNGSync", &StreamPNGSync),
-    InstanceMethod("streamPDFSync", &StreamPDFSync),
+    InstanceMethod("toBuffer", &Canvas::ToBuffer),
+    InstanceMethod("streamPNGSync", &Canvas::StreamPNGSync),
+    InstanceMethod("streamPDFSync", &Canvas::StreamPDFSync),
 #ifdef HAVE_JPEG
-    InstanceMethod("streamJPEGSync", &StreamJPEGSync),
+    InstanceMethod("streamJPEGSync", &Canvas::StreamJPEGSync),
 #endif
-    InstanceAccessor("type", &GetType, nullptr),
-    InstanceAccessor("stride", &GetStride, nullptr),
-    InstanceAccessor("width", &GetWidth, &SetWidth),
-    InstanceAccessor("height", &GetHeight, &SetHeight),
+    InstanceAccessor("type", &Canvas::GetType, nullptr),
+    InstanceAccessor("stride", &Canvas::GetStride, nullptr),
+    InstanceAccessor("width", &Canvas::GetWidth, &Canvas::SetWidth),
+    InstanceAccessor("height", &Canvas::GetHeight, &Canvas::SetHeight),
     InstanceValue("PNG_NO_FILTERS", Napi::Number::New(env, PNG_NO_FILTERS)),
     InstanceValue("PNG_FILTER_NONE", Napi::Number::New(env, PNG_FILTER_NONE)),
     InstanceValue("PNG_FILTER_SUB", Napi::Number::New(env, PNG_FILTER_SUB)),
@@ -54,7 +54,7 @@ Canvas::Initialize(Napi::Env& env, Napi::Object& target) {
     InstanceValue("PNG_FILTER_AVG", Napi::Number::New(env, PNG_FILTER_AVG)),
     InstanceValue("PNG_FILTER_PAETH", Napi::Number::New(env, PNG_FILTER_PAETH)),
     InstanceValue("PNG_ALL_FILTERS", Napi::Number::New(env, PNG_ALL_FILTERS)),
-    StaticMethod("_registerFont", &RegisterFont),
+    StaticMethod("_registerFont", &Canvas::RegisterFont),
   });
 
   constructor = Napi::Persistent(ctor);

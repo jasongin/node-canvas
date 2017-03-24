@@ -222,7 +222,7 @@ Canvas::EIO_AfterToBuffer(eio_req *req) {
     closure->pfn->MakeCallback({ env.Null(), buf });
   }
 
-  closure->canvas->Release();
+  closure->canvas->Unref();
   delete closure->pfn;
   closure_destroy(closure);
   free(closure);
@@ -314,7 +314,7 @@ Napi::Value Canvas::ToBuffer(const Napi::CallbackInfo& info) {
     }
 
     // TODO: only one callback fn in closure
-    this->AddRef();
+    this->Ref();
     closure->pfn = new Napi::FunctionReference();
     closure->pfn->Reset(info[0].As<Napi::Function>(), 1);
 

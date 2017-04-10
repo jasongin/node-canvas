@@ -53,7 +53,7 @@ ImageData::ImageData(const Napi::CallbackInfo& info) {
 
   } else if (info[0].IsTypedArray() && info[1].IsNumber()) {
     Napi::TypedArray typedArray = info[0].As<Napi::TypedArray>();
-    if (typedArray.TypedArrayType() != napi_uint8_clamped) {
+    if (typedArray.TypedArrayType() != napi_uint8_clamped_array) {
       throw Napi::TypeError::New(info.Env(), "The input data must be a Uint8ClampedArray.");
     }
 

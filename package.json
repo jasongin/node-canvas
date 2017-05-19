@@ -29,13 +29,12 @@
     "test-server": "node test/server.js"
   },
   "dependencies": {
-    "node-api": "github:nodejs/node-api",
     "express": "^4.14.0",
     "mocha": "^3.1.2",
+    "node-addon-api": "0.2.0",
     "standard": "^8.5.0"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "engines": {
     "node": ">=0.10.0"
   },

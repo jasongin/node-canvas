@@ -459,7 +459,7 @@ streamPDF(void *c, const uint8_t *data, unsigned len) {
   Napi::Env env = closure->canvas->Env();
   Napi::HandleScope scope(env);
   Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::New(
-    env, const_cast<uint8_t*>(data), len, nullptr);
+    env, const_cast<uint8_t*>(data), len);
   closure->fn.MakeCallback({
     env.Null(),
     buf,

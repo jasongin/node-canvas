@@ -330,7 +330,7 @@ Image::loaded(Napi::Env env) {
   // Nan::AdjustExternalMemory(_data_len); // TODO: napi_adjust_external_memory ??
 
   if (!onload.IsEmpty()) {
-    onload.MakeCallback({});
+    onload.MakeCallback(env.Global(), {});
   }
 }
 
@@ -339,10 +339,10 @@ Image::loaded(Napi::Env env) {
  */
 
 void
-Image::error(Napi::Value err) {
-  Napi::HandleScope scope(err.Env());
+Image::error(Napi::Error err) {
   if (!onerror.IsEmpty()) {
-    onerror.MakeCallback({ err });
+    Napi::HandleScope scope(err.Env());
+    onerror.MakeCallback(err.Env().Global(), { err.Value() });
   }
 }
 

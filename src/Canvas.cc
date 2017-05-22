@@ -215,11 +215,13 @@ Canvas::EIO_AfterToBuffer(eio_req *req) {
 #endif
 
   if (closure->status) {
-    closure->pfn->MakeCallback({ Canvas::Error(env, closure->status) });
+    closure->pfn->MakeCallback(env.Global(), {
+      Canvas::Error(env, closure->status).Value(),
+    });
   } else {
     Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::Copy(
       env, closure->data, closure->len);
-    closure->pfn->MakeCallback({ env.Null(), buf });
+    closure->pfn->MakeCallback(env.Global(), { env.Null(), buf });
   }
 
   closure->canvas->Unref();
@@ -369,7 +371,7 @@ streamPNG(void *c, const uint8_t *data, unsigned len) {
   Napi::Env env = closure->canvas->Env();
   Napi::HandleScope scope(env);
   Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::Copy(env, data, len);
-  closure->fn.MakeCallback({
+  closure->fn.MakeCallback(env.Global(), {
     env.Null(),
     buf,
     Napi::Number::New(env, len)
@@ -437,10 +439,13 @@ void Canvas::StreamPNGSync(const Napi::CallbackInfo& info) {
 
   status = canvas_write_to_png_stream(this->surface(), streamPNG, &closure);
 
+  Napi::HandleScope scope(info.Env());
   if (status) {
-    closure.fn.MakeCallback({ Canvas::Error(info.Env(), status) });
+    closure.fn.MakeCallback(info.Env().Global(), {
+      Canvas::Error(info.Env(), status).Value(),
+    });
   } else {
-    closure.fn.MakeCallback({
+    closure.fn.MakeCallback(info.Env().Global(), {
       info.Env().Null(),
       info.Env().Null(),
       Napi::Number::New(info.Env(), 0),
@@ -460,7 +465,7 @@ streamPDF(void *c, const uint8_t *data, unsigned len) {
   Napi::HandleScope scope(env);
   Napi::Buffer<uint8_t> buf = Napi::Buffer<uint8_t>::New(
     env, const_cast<uint8_t*>(data), len);
-  closure->fn.MakeCallback({
+  closure->fn.MakeCallback(env.Global(), {
     env.Null(),
     buf,
     Napi::Number::New(env, len),
@@ -510,8 +515,9 @@ void Canvas::StreamPDFSync(const Napi::CallbackInfo& info) {
 
   status = canvas_write_to_pdf_stream(this->surface(), streamPDF, &closure);
 
+  Napi::HandleScope scope(info.Env());
   if (status) {
-    closure.fn({ Canvas::Error(info.Env(), status) });
+    closure.fn({ Canvas::Error(info.Env(), status).Value() });
   } else {
     closure.fn({
       info.Env().Null(),
@@ -843,7 +849,7 @@ Canvas::resurface() {
  * Construct an Error from the given cairo status.
  */
 
-Napi::Value
+Napi::Error
 Canvas::Error(Napi::Env env, cairo_status_t status) {
   return Napi::Error::New(env, cairo_status_to_string(status));
 }

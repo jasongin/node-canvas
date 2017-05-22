@@ -69,7 +69,7 @@ class Canvas: public Napi::ObjectWrap<Canvas> {
     void StreamPDFSync(const Napi::CallbackInfo& info);
     void StreamJPEGSync(const Napi::CallbackInfo& info);
     static void RegisterFont(const Napi::CallbackInfo& info);
-    static Napi::Value Error(Napi::Env env, cairo_status_t status);
+    static Napi::Error Error(Napi::Env env, cairo_status_t status);
 #if NODE_VERSION_AT_LEAST(0, 6, 0)
     static void ToBufferAsync(uv_work_t *req);
     static void ToBufferAsyncAfter(uv_work_t *req);

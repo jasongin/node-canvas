@@ -566,7 +566,7 @@ describe('Canvas', function () {
       );
     });
 
-    it('toDataURL("image/jpeg", function (err, str) {...}) works', function (done) {
+    xit('toDataURL("image/jpeg", function (err, str) {...}) works', function (done) {
       new Canvas(200,200).toDataURL('image/jpeg', function(err, str){
         assert.ifError(err);
         assert.ok(0 === str.indexOf('data:image/jpeg;base64,'));
@@ -574,7 +574,7 @@ describe('Canvas', function () {
       });
     });
 
-    it('toDataURL("iMAge/JPEG", function (err, str) {...}) works', function (done) {
+    xit('toDataURL("iMAge/JPEG", function (err, str) {...}) works', function (done) {
       new Canvas(200,200).toDataURL('iMAge/JPEG', function(err, str){
         assert.ifError(err);
         assert.ok(0 === str.indexOf('data:image/jpeg;base64,'));
@@ -582,7 +582,7 @@ describe('Canvas', function () {
       });
     });
 
-    it('toDataURL("image/jpeg", undefined, function (err, str) {...}) works', function (done) {
+    xit('toDataURL("image/jpeg", undefined, function (err, str) {...}) works', function (done) {
       new Canvas(200,200).toDataURL('image/jpeg', undefined, function(err, str){
         assert.ifError(err);
         assert.ok(0 === str.indexOf('data:image/jpeg;base64,'));
@@ -590,7 +590,7 @@ describe('Canvas', function () {
       });
     });
 
-    it('toDataURL("image/jpeg", 0.5, function (err, str) {...}) works', function (done) {
+    xit('toDataURL("image/jpeg", 0.5, function (err, str) {...}) works', function (done) {
       new Canvas(200,200).toDataURL('image/jpeg', 0.5, function(err, str){
         assert.ifError(err);
         assert.ok(0 === str.indexOf('data:image/jpeg;base64,'));
@@ -598,7 +598,7 @@ describe('Canvas', function () {
       });
     });
 
-    it('toDataURL("image/jpeg", opts, function (err, str) {...}) works', function (done) {
+    xit('toDataURL("image/jpeg", opts, function (err, str) {...}) works', function (done) {
       new Canvas(200,200).toDataURL('image/jpeg', {quality: 100}, function(err, str){
         assert.ifError(err);
         assert.ok(0 === str.indexOf('data:image/jpeg;base64,'));
@@ -911,7 +911,7 @@ describe('Canvas', function () {
     });
   });
 
-  it('Canvas#jpegStream()', function (done) {
+  xit('Canvas#jpegStream()', function (done) {
     var canvas = new Canvas(640, 480);
     var stream = canvas.jpegStream();
     var firstChunk = true;
@@ -934,7 +934,7 @@ describe('Canvas', function () {
     });
   });
 
-  it('Canvas#jpegStream() should clamp buffer size (#674)', function (done) {
+  xit('Canvas#jpegStream() should clamp buffer size (#674)', function (done) {
     var c = new Canvas(10, 10);
     var SIZE = 10 * 1024 * 1024;
     var s = c.jpegStream({bufsize: SIZE});

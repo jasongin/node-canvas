@@ -84,7 +84,7 @@ ImageData::ImageData(const Napi::CallbackInfo& info) {
   _width = width;
   _height = height;
   _data = clampedArray.Data();
-  info.This().Set("data", clampedArray);
+  info.This().As<Napi::Object>().Set("data", clampedArray);
 }
 
 /*

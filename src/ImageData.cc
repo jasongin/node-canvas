@@ -32,7 +32,7 @@ ImageData::Initialize(Napi::Env& env, Napi::Object& target) {
  */
 
 ImageData::ImageData(const Napi::CallbackInfo& info) {
-  Napi::Uint8ClampedArray clampedArray;
+  Napi::Uint8Array clampedArray;
 
   uint32_t width;
   uint32_t height;
@@ -49,7 +49,7 @@ ImageData::ImageData(const Napi::CallbackInfo& info) {
     }
     length = width * height * 4;
 
-    clampedArray = Napi::Uint8ClampedArray::New(info.Env(), length);
+    clampedArray = Napi::Uint8Array::New(info.Env(), length, napi_uint8_clamped_array);
 
   } else if (info[0].IsTypedArray() && info[1].IsNumber()) {
     Napi::TypedArray typedArray = info[0].As<Napi::TypedArray>();
@@ -57,7 +57,7 @@ ImageData::ImageData(const Napi::CallbackInfo& info) {
       throw Napi::TypeError::New(info.Env(), "The input data must be a Uint8ClampedArray.");
     }
 
-    clampedArray = typedArray.AsUint8ClampedArray();
+    clampedArray = typedArray.As<Napi::Uint8Array>();
     length = clampedArray.ElementLength();
     if (length == 0) {
       throw Napi::RangeError::New(info.Env(), "The input data has a zero byte length.");

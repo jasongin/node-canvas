@@ -690,7 +690,7 @@ Napi::Value Context2d::GetImageData(const Napi::CallbackInfo& info) {
 
   uint8_t *src = canvas->data();
 
-  Napi::Uint8ClampedArray clampedArray = Napi::Uint8ClampedArray::New(info.Env(), size);
+  Napi::Uint8Array clampedArray = Napi::Uint8Array::New(info.Env(), size, napi_uint8_clamped_array);
   uint8_t* dst = clampedArray.Data();
 
   // Normalize data (argb -> rgba)

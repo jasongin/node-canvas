@@ -34,10 +34,10 @@ empty_closure_output_buffer(j_compress_ptr cinfo){
   Napi::HandleScope scope(env);
 
   Napi::Buffer<JOCTET> buf = Napi::Buffer<JOCTET>::New(
-    env, dest->buffer, dest->bufsize, nullptr);
+    env, dest->buffer, dest->bufsize);
 
   // emit "data"
-  dest->closure->fn.MakeCallback({
+  dest->closure->fn.MakeCallback(env.Global(), {
     env.Null(),
     buf,
   });
@@ -56,15 +56,15 @@ term_closure_destination(j_compress_ptr cinfo){
 
   /* emit remaining data */
   Napi::Buffer<JOCTET> buf = Napi::Buffer<JOCTET>::New(
-    env, dest->buffer, dest->bufsize - dest->pub.free_in_buffer, nullptr);
+    env, dest->buffer, dest->bufsize - dest->pub.free_in_buffer);
 
-  dest->closure->fn.MakeCallback({
+  dest->closure->fn.MakeCallback(env.Global(), {
     env.Null(),
     buf,
   });
 
   // emit "end"
-  dest->closure->fn.MakeCallback({
+  dest->closure->fn.MakeCallback(env.Global(), {
     env.Null(),
     env.Null(),
   });

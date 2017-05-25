@@ -49,6 +49,8 @@ describe('Image', function () {
     };
 
     img.src = png_checkers;
+console.log("Expected: " + JSON.stringify(png_checkers));
+console.log("Actual  : " + JSON.stringify(img.src));
     assert.equal(img.src, png_checkers);
     assert.strictEqual(true, img.complete);
     assert.strictEqual(2, img.width);

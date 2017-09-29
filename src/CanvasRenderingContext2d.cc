@@ -144,10 +144,6 @@ Context2d::Initialize(Napi::Env& env, Napi::Object& target) {
  * Create a cairo context.
  */
 
-Context2d::Context2d(Canvas *canvas) {
-  init(canvas);
-}
-
 void Context2d::init(Canvas *canvas) {
   _canvas = canvas;
   _context = cairo_create(canvas->surface());
@@ -492,8 +488,9 @@ Context2d::blur(cairo_surface_t *surface, int radius) {
  * Initialize a new Context2d with the given canvas.
  */
 
-Context2d::Context2d(const Napi::CallbackInfo& info) {
-  Napi::Object obj = info[0].As<Napi::Object>();
+Context2d::Context2d(const Napi::CallbackInfo& info) :
+  Napi::ObjectWrap<Context2d>(info) {
+Napi::Object obj = info[0].As<Napi::Object>();
 
   if (!obj.InstanceOf(Canvas::constructor.Value().As<Napi::Function>())) {
     throw Napi::TypeError::New(info.Env(),"Canvas expected");

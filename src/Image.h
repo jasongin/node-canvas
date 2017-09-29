@@ -77,7 +77,6 @@ class Image : public Napi::ObjectWrap<Image> {
     void error(Napi::Error error);
     void loaded(Napi::Env env);
     cairo_status_t load();
-    Image();
 
     enum {
         DEFAULT

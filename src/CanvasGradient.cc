@@ -32,7 +32,8 @@ Gradient::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a new CanvasGradient.
  */
 
-Gradient::Gradient(const Napi::CallbackInfo& info) {
+Gradient::Gradient(const Napi::CallbackInfo& info):
+  Napi::ObjectWrap<Gradient>(info) {
   // Linear
   if (4 == info.Length()) {
     _pattern = cairo_pattern_create_linear(
@@ -81,22 +82,6 @@ void Gradient::AddColorStop(const Napi::CallbackInfo& info) {
   } else {
     throw Napi::TypeError::New(info.Env(),"parse color failed");
   }
-}
-
-/*
- * Initialize linear gradient.
- */
-
-Gradient::Gradient(double x0, double y0, double x1, double y1) {
-  _pattern = cairo_pattern_create_linear(x0, y0, x1, y1);
-}
-
-/*
- * Initialize radial gradient.
- */
-
-Gradient::Gradient(double x0, double y0, double r0, double x1, double y1, double r1) {
-  _pattern = cairo_pattern_create_radial(x0, y0, r0, x1, y1, r1);
 }
 
 /*

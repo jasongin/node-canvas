@@ -66,7 +66,8 @@ Canvas::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a Canvas with the given width and height.
  */
 
-Canvas::Canvas(const Napi::CallbackInfo& info) {
+Canvas::Canvas(const Napi::CallbackInfo& info):
+    Napi::ObjectWrap<Canvas>(info) {
   int w = 0, h = 0;
   canvas_type_t t = CANVAS_TYPE_IMAGE;
   if (info[0].IsNumber()) {
@@ -637,10 +638,6 @@ void Canvas::RegisterFont(const Napi::CallbackInfo& info) {
 /*
  * Initialize cairo surface.
  */
-
-Canvas::Canvas(int w, int h, canvas_type_t t) {
-  init(w, h, t);
-}
 
 void Canvas::init(int w, int h, canvas_type_t t) {
   type = t;

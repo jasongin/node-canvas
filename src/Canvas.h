@@ -1,4 +1,3 @@
-
 //
 // Canvas.h
 //
@@ -94,7 +93,6 @@ class Canvas: public Napi::ObjectWrap<Canvas> {
     inline uint8_t *data(){ return cairo_image_surface_get_data(_surface); }
     inline int stride(){ return cairo_image_surface_get_stride(_surface); }
     inline int nBytes(){ return height * stride(); }
-    Canvas(int width, int height, canvas_type_t type);
     void init(int width, int height, canvas_type_t type);
     void resurface();
 

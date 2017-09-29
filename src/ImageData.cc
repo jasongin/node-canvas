@@ -31,7 +31,8 @@ ImageData::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a new ImageData object.
  */
 
-ImageData::ImageData(const Napi::CallbackInfo& info) {
+ImageData::ImageData(const Napi::CallbackInfo& info) :
+  Napi::ObjectWrap<ImageData>(info) { 
   Napi::Uint8Array clampedArray;
 
   uint32_t width;

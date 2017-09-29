@@ -63,8 +63,17 @@ Image::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a new Image.
  */
 
-Image::Image(const Napi::CallbackInfo& info) : Image() {
-  this->data_mode = DATA_IMAGE;
+Image::Image(const Napi::CallbackInfo& info) :
+  Napi::ObjectWrap<Image>(info),
+  filename(NULL),
+  _data(NULL),
+  _data_len(0),
+  _surface(NULL),
+  width(0),
+  height(0),
+  state(DEFAULT),
+  data_mode(DATA_IMAGE)
+{
 }
 
 /*
@@ -279,19 +288,6 @@ void Image::SetOnerror(const Napi::CallbackInfo& info, const Napi::Value& value)
   } else if (value.IsNull()) {
     this->onerror.Reset();
   }
-}
-
-/*
- * Initialize a new Image.
- */
-
-Image::Image() {
-  filename = NULL;
-  _data = NULL;
-  _data_len = 0;
-  _surface = NULL;
-  width = height = 0;
-  state = DEFAULT;
 }
 
 /*

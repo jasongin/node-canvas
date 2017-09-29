@@ -31,7 +31,7 @@
   "dependencies": {
     "express": "^4.14.0",
     "mocha": "^3.1.2",
-    "node-addon-api": "0.3.1",
+    "node-addon-api": "1.0.0",
     "standard": "^8.5.0"
   },
   "devDependencies": {},

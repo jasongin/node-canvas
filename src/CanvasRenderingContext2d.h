@@ -57,7 +57,6 @@ class Context2d: public Napi::ObjectWrap<Context2d> {
     short stateno;
     canvas_state_t *states[CANVAS_MAX_STATES];
     canvas_state_t *state;
-    Context2d(Canvas *canvas);
     void init(Canvas *canvas);
     static Napi::FunctionReference constructor;
     static void Initialize(Napi::Env& env, Napi::Object& target);

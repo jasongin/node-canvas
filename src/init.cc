@@ -22,7 +22,7 @@
 #define snprintf _snprintf
 #endif
 
-void init(Napi::Env env, Napi::Object exports, Napi::Object module) {
+Napi::Object init(Napi::Env env, Napi::Object exports) {
   Canvas::Initialize(env, exports);
   Image::Initialize(env, exports);
   ImageData::Initialize(env, exports);
@@ -72,6 +72,8 @@ void init(Napi::Env env, Napi::Object exports, Napi::Object module) {
   char freetype_version[10];
   snprintf(freetype_version, 10, "%d.%d.%d", FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
   exports.Set("freetypeVersion", freetype_version);
+
+  return exports;
 }
 
 NODE_API_MODULE(canvas, init);

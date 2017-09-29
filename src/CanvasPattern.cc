@@ -29,7 +29,8 @@ Pattern::Initialize(Napi::Env& env, Napi::Object& target) {
  * Initialize a new CanvasPattern.
  */
 
-Pattern::Pattern(const Napi::CallbackInfo& info) {
+Pattern::Pattern(const Napi::CallbackInfo& info) :
+  Napi::ObjectWrap<Pattern>(info) {
   cairo_surface_t *surface;
 
   Napi::Object obj = info[0].As<Napi::Object>();
@@ -54,14 +55,6 @@ Pattern::Pattern(const Napi::CallbackInfo& info) {
   _pattern = cairo_pattern_create_for_surface(surface);
 }
 
-
-/*
- * Initialize linear gradient.
- */
-
-Pattern::Pattern(cairo_surface_t *surface) {
-  _pattern = cairo_pattern_create_for_surface(surface);
-}
 
 /*
  * Destroy the pattern.
